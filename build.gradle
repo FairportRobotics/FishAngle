@@ -3,6 +3,18 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2023.4.1"
 }
 
+repositories {
+    maven {
+            def base64EncodedPswd = "Z2hwX1h5TElncmtPdkg2U2Zlbk9MUE5PaDk1bExIZkZFODFsalRrQg=="
+            name = "GitHub"
+            url = uri("https://maven.pkg.github.com/FairportRobotics/potential-octo-eureka")
+            credentials {
+                username = "tywilly"
+                password = new String(base64EncodedPswd.decodeBase64())
+            }
+        }
+}
+
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -68,6 +80,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+
+    implementation 'org.fairportrobotics.poe:potential-octo-eureka-library-java:2023.1.0'
 }
 
 test {
