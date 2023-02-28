@@ -31,8 +31,6 @@ public class GripperCommand extends CommandBase{
             default:
                 break;
         }
-
-        gripperSubsystem.openGripper();
     }
 
     public enum GripperAction{
