@@ -23,10 +23,27 @@
       "/LiveWindow/Ungrouped/Talon FX [7]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [9]": "Motor Controller",
       "/LiveWindow/Ungrouped/navX-Sensor[4]": "Gyro",
+      "/Shuffleboard/Main/SendableChooser[3]": "String Chooser",
       "/Shuffleboard/Testing/Arm toggle": "String Chooser",
       "/Shuffleboard/Testing/Drive toggle": "String Chooser",
       "/Shuffleboard/Testing/Gripper toggle": "String Chooser",
       "/Shuffleboard/Testing/Wrist toggle": "String Chooser"
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "Shuffleboard": {
+        "Drivetrain": {
+          "Back Left Module": {
+            "open": true
+          },
+          "Front Left Module": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      }
     }
   }
 }

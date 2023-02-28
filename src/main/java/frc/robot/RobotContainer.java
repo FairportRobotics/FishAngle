@@ -9,8 +9,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.ArmMoveToPositionCommand;
+import frc.robot.commands.GripperCommand;
 import frc.robot.commands.SwerveDriveCommand;
-import frc.robot.commands.SwerveDrivePathCommand;
+import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
+import frc.robot.commands.GripperCommand.GripperAction;
+import frc.robot.commands.autonomus.LeaveZoneAndChargeAutoCommand;
+import frc.robot.commands.autonomus.LeaveZoneAutoCommand;
+import frc.robot.commands.autonomus.OneConeAutoCommand;
+import frc.robot.commands.autonomus.OneCubeAutoCommand;
+import frc.robot.commands.autonomus.TwoCubeAutoCommand;
 import frc.robot.subsystem.ArmSubsystem;
 import frc.robot.subsystem.GripperSubsystem;
 import frc.robot.subsystem.LightingSubsystem;
@@ -26,7 +34,7 @@ public class RobotContainer {
     public static final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
 
-    private final SendableChooser<String> autoChooser;
+    private final SendableChooser<Command> autoChooser;
 
     private SwerveDriveCommand swerveDriveCommand;
 
@@ -38,13 +46,17 @@ public class RobotContainer {
 
     Trigger gamePieceToggleBtn;
 
-    GamePiece requestedGamePiece = GamePiece.CONE;
+    public static GamePiece requestedGamePiece = GamePiece.CONE;
 
     public RobotContainer() {
-        autoChooser = new SendableChooser<String>();
-        autoChooser.setDefaultOption("None", "");
-        autoChooser.addOption("Move out zone", "Move_Out_Zone");
-        autoChooser.addOption("Move out zone charge", "Move_Out_Zone_Charge");
+        autoChooser = new SendableChooser<Command>();
+        autoChooser.addOption("None", Commands.print("No auto command selected"));
+        autoChooser.addOption("Leave Zone", new LeaveZoneAutoCommand());
+        autoChooser.addOption("Leave Zone and Charge", new LeaveZoneAndChargeAutoCommand());
+        autoChooser.addOption("One Cone", new OneConeAutoCommand());
+        autoChooser.addOption("One Cube", new OneCubeAutoCommand());
+        autoChooser.setDefaultOption("Two Cube", new TwoCubeAutoCommand());
+        Robot.MAIN_TAB.add(autoChooser);
 
         initCommands();
         configureBindings();
@@ -56,66 +68,19 @@ public class RobotContainer {
 
     private void configureBindings() {
         toggleGripperBtn = operatorController.leftBumper();
-        toggleGripperBtn.onTrue(Commands.runOnce(() -> {
-            gripperSubsystem.toggleGripper();
-        }, gripperSubsystem));
+        toggleGripperBtn.onTrue(new GripperCommand(GripperAction.kToggle));
 
         highPosBtn = operatorController.a();
-        highPosBtn.onTrue(Commands.runOnce(() -> {
-            double armPos = 0.0;
-            double wristPos = 0.0;
-
-            if (requestedGamePiece == GamePiece.CONE) {
-                armPos = Constants.ARM_HIGH_POS_VAL_CONE;
-                wristPos = Constants.WRIST_HIGH_POS_VAL_CONE;
-            }
-            armPos = Constants.ARM_HIGH_POS_VAL_CUBE;
-            wristPos = Constants.WRIST_HIGH_POS_VAL_CUBE;
-
-            armSubsystem.setArmPosition(armPos);
-            armSubsystem.setWristPosition(wristPos);
-        }, armSubsystem));
+        highPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kHigh));
 
         midPosBtn = operatorController.b();
-        midPosBtn.onTrue(Commands.runOnce(() -> {
-            double armPos = 0.0;
-            double wristPos = 0.0;
-
-            if (requestedGamePiece == GamePiece.CONE) {
-                armPos = Constants.ARM_MID_POS_VAL_CONE;
-                wristPos = Constants.WRIST_MID_POS_VAL_CONE;
-            }
-            armPos = Constants.ARM_MID_POS_VAL_CUBE;
-            wristPos = Constants.WRIST_MID_POS_VAL_CUBE;
-
-            armSubsystem.setArmPosition(armPos);
-            armSubsystem.setWristPosition(wristPos);
-        }, armSubsystem));
+        midPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kMid));
 
         lowPosBtn = operatorController.x();
-        lowPosBtn.onTrue(Commands.runOnce(() -> {
-            double armPos = 0.0;
-            double wristPos = 0.0;
-
-            if (requestedGamePiece == GamePiece.CONE) {
-                armPos = Constants.ARM_LOW_POS_VAL_CONE;
-                wristPos = Constants.WRIST_LOW_POS_VAL_CONE;
-            }
-            armPos = Constants.ARM_LOW_POS_VAL_CUBE;
-            wristPos = Constants.WRIST_LOW_POS_VAL_CUBE;
-
-            armSubsystem.setArmPosition(armPos);
-            armSubsystem.setWristPosition(wristPos);
-        }, armSubsystem));
+        lowPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kLow));
 
         homePosBtn = operatorController.y();
-        homePosBtn.onTrue(Commands.runOnce(() -> {
-            double armPos = Constants.ARM_HOME_POS_VAL;
-            double wristPos = Constants.WRIST_HOME_POS_VAL;
-
-            armSubsystem.setArmPosition(armPos);
-            armSubsystem.setWristPosition(wristPos);
-        }, armSubsystem));
+        homePosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kHome));
 
         gamePieceToggleBtn = operatorController.rightBumper();
         gamePieceToggleBtn.onTrue(Commands.runOnce(() -> {
@@ -128,16 +93,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-
-        Command autoCommand;
-
-        if (autoChooser.getSelected() == "") {
-            autoCommand = Commands.print("No auto command selected");
-        } else {
-            autoCommand = new SwerveDrivePathCommand(autoChooser.getSelected());
-        }
-
-        return autoCommand;
+        return autoChooser.getSelected();
     }
 
     public enum GamePiece {

@@ -32,6 +32,7 @@ public class ArmSubsystem extends SubsystemBase {
         armFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
         armPot = new AnalogInput(Constants.ARM_POT_ID);
         armPidController = new PIDController(1, 0, 0.2); // TODO: Tune
+        armPidController.setTolerance(100);
 
         isArmEnabled.addOption("Enabled", true);
         isArmEnabled.setDefaultOption("Disabled", false);
@@ -41,6 +42,7 @@ public class ArmSubsystem extends SubsystemBase {
         wristFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
         wristPot = new AnalogInput(Constants.WRIST_POT_ID);
         wristPidController = new PIDController(1, 0, 0.2); // TODO: Tune
+        wristPidController.setTolerance(100);
 
         isWristEnabled.addOption("Enabled", true);
         isWristEnabled.setDefaultOption("Disabled", false);
@@ -102,6 +104,10 @@ public class ArmSubsystem extends SubsystemBase {
 
     public double getWristSetpoint() {
         return wristPidController.getSetpoint();
+    }
+
+    public boolean isAtRequestedPosition(){
+        return armPidController.atSetpoint() && wristPidController.atSetpoint();
     }
 
 }

@@ -51,6 +51,9 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
         }
+
+        RobotContainer.swerveDriveSubsystem.zeroGyroscope();
+
     }
 
     @Override
@@ -66,6 +69,7 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
+        RobotContainer.swerveDriveSubsystem.zeroGyroscope();
     }
 
     @Override
@@ -74,9 +78,9 @@ public class Robot extends TimedRobot {
             m_robotContainer.getTeleopDriveCommand().schedule();
         }
 
-        if (m_robotContainer.requestedGamePiece == GamePiece.CONE) {
+        if (RobotContainer.requestedGamePiece == GamePiece.CONE) {
             RobotContainer.lightingSubsystem.setConeColor();
-        } else if (m_robotContainer.requestedGamePiece == GamePiece.CUBE) {
+        } else if (RobotContainer.requestedGamePiece == GamePiece.CUBE) {
             RobotContainer.lightingSubsystem.setCubeColor();
         }
 
