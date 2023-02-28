@@ -16,13 +16,15 @@ public class LightingSubsystem extends SubsystemBase {
     public void testInit(){
 
     }
-
+    
+//Color rgb values have to be a multiple of 5 otherwise the arduino will never get the color correct
+    
     public void setCubeColor() {
-        this.lightingController.fillAll("153062181");
+        this.lightingController.fillAll("155060180");
     }
 
     public void setConeColor() {
-        this.lightingController.fillAll("235184000");
+        this.lightingController.fillAll("235185000");
     }
 
     public void rainbow() {
