@@ -33,7 +33,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
-        m_robotContainer.lightingSubsystem.rainbow();
+        RobotContainer.lightingSubsystem.rainbow();
     }
 
     @Override
@@ -75,9 +75,9 @@ public class Robot extends TimedRobot {
         }
 
         if (m_robotContainer.requestedGamePiece == GamePiece.CONE) {
-            m_robotContainer.lightingSubsystem.setConeColor();
+            RobotContainer.lightingSubsystem.setConeColor();
         } else if (m_robotContainer.requestedGamePiece == GamePiece.CUBE) {
-            m_robotContainer.lightingSubsystem.setCubeColor();
+            RobotContainer.lightingSubsystem.setCubeColor();
         }
 
     }

@@ -4,31 +4,27 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
-
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SwerveDriveCommand;
+import frc.robot.commands.SwerveDrivePathCommand;
 import frc.robot.subsystem.ArmSubsystem;
 import frc.robot.subsystem.GripperSubsystem;
 import frc.robot.subsystem.LightingSubsystem;
 import frc.robot.subsystem.swerve.SwerveDriveSubsystem;
-import frc.robot.subsystem.swerve.SwerveDriveSubsystem.SwerveDriveBuilder;
-import frc.robot.subsystem.swerve.SwerveModule.SwerveModuleBuilder;
 
 public class RobotContainer {
 
-    CommandXboxController driverController = new CommandXboxController(Constants.DRIVER_XBOX_CONTROLLER_ID);
-    CommandXboxController operatorController = new CommandXboxController(Constants.OPERATOR_XBOX_CONTROLLER_ID);
+    public static final CommandXboxController driverController = new CommandXboxController(Constants.DRIVER_XBOX_CONTROLLER_ID);
+    public static final CommandXboxController operatorController = new CommandXboxController(Constants.OPERATOR_XBOX_CONTROLLER_ID);
 
-    public final ArmSubsystem armSubsystem = new ArmSubsystem(operatorController);
-    public final GripperSubsystem gripperSubsystem = new GripperSubsystem(operatorController);
-    public final SwerveDriveSubsystem swerveDriveSubsystem;
-    public final LightingSubsystem lightingSubsystem = new LightingSubsystem();
+    public static final ArmSubsystem armSubsystem = new ArmSubsystem(operatorController);
+    public static final GripperSubsystem gripperSubsystem = new GripperSubsystem(operatorController);
+    public static final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
+    public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
 
     private final SendableChooser<String> autoChooser;
 
@@ -45,52 +41,6 @@ public class RobotContainer {
     GamePiece requestedGamePiece = GamePiece.CONE;
 
     public RobotContainer() {
-
-        this.swerveDriveSubsystem = new SwerveDriveBuilder()
-                .addSwerveModule(new SwerveModuleBuilder()
-                        .setName("Front Left")
-                        .setLocation(Constants.WHEEL_BASE / 2, Constants.TRACK_WIDTH / 2)
-                        .setMotorIds(Constants.FRONT_LEFT_DRIVE_ID, Constants.FRONT_LEFT_ENCODER_ID)
-                        .setAbsoluteEncoderId(Constants.FRONT_LEFT_ENCODER_ID)
-                        .setSteerEncoderOffset(Constants.FRONT_LEFT_SWERVE_OFFSET)
-                        .setDriveEncoderTicksPerMeter(Constants.ENCODER_TICKS_PER_METER)
-                        .setSteerPID(Constants.SWERVE_STEER_P, Constants.SWERVE_STEER_I, Constants.SWERVE_STEER_D)
-                        .setSwerveProfile(Constants.MAX_ANG_ACC, Constants.MAX_ANG_VEL)
-                        .build())
-                .addSwerveModule(new SwerveModuleBuilder()
-                        .setName("Front Right")
-                        .setLocation(Constants.WHEEL_BASE / 2, -Constants.TRACK_WIDTH / 2)
-                        .setMotorIds(Constants.FRONT_RIGHT_DRIVE_ID, Constants.FRONT_RIGHT_ENCODER_ID)
-                        .setAbsoluteEncoderId(Constants.FRONT_RIGHT_ENCODER_ID)
-                        .setSteerEncoderOffset(Constants.FRONT_RIGHT_SWERVE_OFFSET)
-                        .setDriveEncoderTicksPerMeter(Constants.ENCODER_TICKS_PER_METER)
-                        .setSteerPID(Constants.SWERVE_STEER_P, Constants.SWERVE_STEER_I, Constants.SWERVE_STEER_D)
-                        .setSwerveProfile(Constants.MAX_ANG_ACC, Constants.MAX_ANG_VEL)
-                        .build())
-                .addSwerveModule(new SwerveModuleBuilder()
-                        .setName("Back Left")
-                        .setLocation(-Constants.WHEEL_BASE / 2, Constants.TRACK_WIDTH / 2)
-                        .setMotorIds(Constants.BACK_LEFT_DRIVE_ID, Constants.BACK_LEFT_ENCODER_ID)
-                        .setAbsoluteEncoderId(Constants.BACK_LEFT_ENCODER_ID)
-                        .setSteerEncoderOffset(Constants.BACK_LEFT_SWERVE_OFFSET)
-                        .setDriveEncoderTicksPerMeter(Constants.ENCODER_TICKS_PER_METER)
-                        .setSteerPID(Constants.SWERVE_STEER_P, Constants.SWERVE_STEER_I, Constants.SWERVE_STEER_D)
-                        .setSwerveProfile(Constants.MAX_ANG_ACC, Constants.MAX_ANG_VEL)
-                        .build())
-                .addSwerveModule(new SwerveModuleBuilder()
-                        .setName("Back Right")
-                        .setLocation(-Constants.WHEEL_BASE / 2, -Constants.TRACK_WIDTH / 2)
-                        .setMotorIds(Constants.BACK_RIGHT_DRIVE_ID, Constants.BACK_RIGHT_ENCODER_ID)
-                        .setAbsoluteEncoderId(Constants.BACK_RIGHT_ENCODER_ID)
-                        .setSteerEncoderOffset(Constants.BACK_RIGHT_SWERVE_OFFSET)
-                        .setDriveEncoderTicksPerMeter(Constants.ENCODER_TICKS_PER_METER)
-                        .setSteerPID(Constants.SWERVE_STEER_P, Constants.SWERVE_STEER_I, Constants.SWERVE_STEER_D)
-                        .setSwerveProfile(Constants.MAX_ANG_ACC, Constants.MAX_ANG_VEL)
-                        .build())
-                .setMaxDriveSpeed(1.0)
-                .setMaxRotationSpeed(0.1)
-                .build();
-
         autoChooser = new SendableChooser<String>();
         autoChooser.setDefaultOption("None", "");
         autoChooser.addOption("Move out zone", "Move_Out_Zone");
@@ -101,7 +51,7 @@ public class RobotContainer {
     }
 
     private void initCommands() {
-        this.swerveDriveCommand = new SwerveDriveCommand(driverController, swerveDriveSubsystem);
+        this.swerveDriveCommand = new SwerveDriveCommand();
     }
 
     private void configureBindings() {
@@ -182,10 +132,9 @@ public class RobotContainer {
         Command autoCommand;
 
         if (autoChooser.getSelected() == "") {
-            autoCommand = Commands.print("No auto command slected");
+            autoCommand = Commands.print("No auto command selected");
         } else {
-            autoCommand = swerveDriveSubsystem.followTrajectoryCommand(
-                    PathPlanner.loadPath(autoChooser.getSelected(), new PathConstraints(1, 1)), true);
+            autoCommand = new SwerveDrivePathCommand(autoChooser.getSelected());
         }
 
         return autoCommand;

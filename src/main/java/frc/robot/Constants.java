@@ -17,7 +17,7 @@ public class Constants {
     public static final int WRIST_MAX_POT_VALUE = 2500;
     public static final int WRIST_MIN_POT_VALUE = 2000;
 
-    
+
 
     public static final int ARM_HIGH_POS_VAL_CUBE = 2048;
     public static final int WRIST_HIGH_POS_VAL_CUBE = 2048;
@@ -47,8 +47,8 @@ public class Constants {
     public static final int GRIPPER_SOLENOID_OPEN_ID = 1;
     public static final int GRIPPER_SOLENOID_CLOSE_ID = 1;
 
-    public static final double WHEEL_BASE = 20.0;
-    public static final double TRACK_WIDTH = 20.0;
+    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.508;
+    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.508;
 
     public static final int FRONT_LEFT_DRIVE_ID = 1;
     public static final int FRONT_LEFT_SWERVE_ID = 2;
