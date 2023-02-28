@@ -33,6 +33,11 @@ public class GripperCommand extends CommandBase{
         }
     }
 
+    @Override
+    public boolean isFinished() {
+       return true; 
+    }
+
     public enum GripperAction{
         kOpen,
         kClose,

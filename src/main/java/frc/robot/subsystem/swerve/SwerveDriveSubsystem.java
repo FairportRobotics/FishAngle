@@ -65,7 +65,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public SwerveDriveSubsystem() {
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
-
+        lastKnownFieldPos = new Pose3d();
         try {
             this.fieldPositionEstimator = new RobotFieldPosition("cameraName", new Transform3d(),
                     AprilTagFields.k2023ChargedUp,
@@ -152,6 +152,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public Pose2d getPose() {
         return odometry.getPoseMeters();
+    }
+
+    public void testInit(){
+
     }
 
     @Override

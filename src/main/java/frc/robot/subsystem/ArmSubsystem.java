@@ -19,11 +19,13 @@ public class ArmSubsystem extends SubsystemBase {
     AnalogInput armPot;
     PIDController armPidController;
     SendableChooser<Boolean> isArmEnabled = new SendableChooser<Boolean>();
+    double currentArmSpeed = 0.0;
 
     TalonFX wristFalcon;
     AnalogInput wristPot;
     PIDController wristPidController;
     SendableChooser<Boolean> isWristEnabled = new SendableChooser<Boolean>();
+    double currentWristSpeed = 0.0;
 
     public ArmSubsystem(CommandXboxController operatorController) {
         this.operatorController = operatorController;
@@ -46,7 +48,6 @@ public class ArmSubsystem extends SubsystemBase {
 
         isWristEnabled.addOption("Enabled", true);
         isWristEnabled.setDefaultOption("Disabled", false);
-        Robot.TESTING_TAB.add("Wrist toggle", isWristEnabled);
     }
 
     @Override
@@ -54,40 +55,45 @@ public class ArmSubsystem extends SubsystemBase {
         setArmPosition(getArmSetpoint() + (operatorController.getLeftY() * 10));
         setWristPosition(getWristSetpoint() + (operatorController.getRightY() * 10));
 
-        double armSpeed = armPidController.calculate(armPot.getValue());
-        double wristSpeed = wristPidController.calculate(wristPot.getValue());
+        currentArmSpeed = armPidController.calculate(armPot.getValue());
+        currentWristSpeed = wristPidController.calculate(wristPot.getValue());
 
-        armSpeed = Math.min(-100, Math.max(armSpeed, 100));
-        wristSpeed = Math.min(-100, Math.max(wristSpeed, 100));
+        currentArmSpeed = Math.max(-100, Math.min(currentArmSpeed, 100));
+        currentWristSpeed = Math.max(-100, Math.min(currentWristSpeed, 100));
 
         if (armPot.getValue() >= Constants.ARM_MAX_POT_VALUE) {
-            armSpeed = Math.min(armSpeed, 0);
+            currentArmSpeed = Math.min(currentArmSpeed, 0);
         } else if (armPot.getValue() <= Constants.ARM_MIN_POT_VALUE) {
-            armSpeed = Math.max(armSpeed, 0);
+            currentArmSpeed = Math.max(currentArmSpeed, 0);
         }
 
         if (wristPot.getValue() >= Constants.WRIST_MAX_POT_VALUE) {
-            wristSpeed = Math.min(wristSpeed, 0);
+            currentWristSpeed = Math.min(currentWristSpeed, 0);
         } else if (wristPot.getValue() <= Constants.WRIST_MIN_POT_VALUE) {
-            wristSpeed = Math.max(wristSpeed, 0);
+            currentWristSpeed = Math.max(currentWristSpeed, 0);
         }
 
         if (DriverStation.isTest() && !isArmEnabled.getSelected())
-            armSpeed = 0.0;
-        armFalcon.set(ControlMode.Velocity, armSpeed);
+            currentArmSpeed = 0.0;
+        armFalcon.set(ControlMode.Velocity, currentArmSpeed);
 
         if (DriverStation.isTest() && !isWristEnabled.getSelected())
-            wristSpeed = 0.0;
-        wristFalcon.set(ControlMode.Velocity, wristSpeed);
+            currentWristSpeed = 0.0;
+        wristFalcon.set(ControlMode.Velocity, currentWristSpeed);
 
-        if (DriverStation.isTest()) {
-            Robot.DEBUG_TAB.add("Arm Pos", armPot.getValue());
-            Robot.DEBUG_TAB.add("Arm Speed", armSpeed);
+    }
 
-            Robot.DEBUG_TAB.add("Wrist Pos", wristPot.getValue());
-            Robot.DEBUG_TAB.add("Wrist Speed", wristSpeed);
-        }
+    public void testInit() {
+        Robot.TESTING_TAB.add("Wrist toggle", isWristEnabled);
+        Robot.DEBUG_TAB.addNumber("Arm setpoint", armPidController::getSetpoint);
+        Robot.DEBUG_TAB.addNumber("Arm Pos", armPot::getValue);
+        Robot.DEBUG_TAB.addNumber("Arm Speed", () -> currentArmSpeed);
+        Robot.DEBUG_TAB.addBoolean("Arm set", armPidController::atSetpoint);
 
+        Robot.DEBUG_TAB.addNumber("Wrist setpoint", wristPidController::getSetpoint);
+        Robot.DEBUG_TAB.addNumber("Wrist Pos", wristPot::getValue);
+        Robot.DEBUG_TAB.addNumber("Wrist Speed", () -> currentWristSpeed);
+        Robot.DEBUG_TAB.addBoolean("Wrist set", wristPidController::atSetpoint);
     }
 
     public void setArmPosition(double pos) {
@@ -106,7 +112,7 @@ public class ArmSubsystem extends SubsystemBase {
         return wristPidController.getSetpoint();
     }
 
-    public boolean isAtRequestedPosition(){
+    public boolean isAtRequestedPosition() {
         return armPidController.atSetpoint() && wristPidController.atSetpoint();
     }
 

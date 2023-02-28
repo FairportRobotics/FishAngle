@@ -13,6 +13,10 @@ public class LightingSubsystem extends SubsystemBase {
         lightingController = new ArduinoLightingController(9600, Port.kUSB);
     }
 
+    public void testInit(){
+
+    }
+
     public void setCubeColor() {
         this.lightingController.fillAll("153062181");
     }

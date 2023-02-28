@@ -29,11 +29,14 @@ public class GripperSubsystem extends SubsystemBase {
 
         isGripperEnabled.setDefaultOption("Disabled", false);
         isGripperEnabled.addOption("Enabled", true);
-        Robot.TESTING_TAB.add("Gripper toggle", isGripperEnabled);
     }
 
     @Override
     public void periodic() {
+    }
+
+    public void testInit() {
+        Robot.TESTING_TAB.add("Gripper toggle", isGripperEnabled);
     }
 
     public void toggleGripper() {

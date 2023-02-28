@@ -97,6 +97,11 @@ public class Robot extends TimedRobot {
             m_robotContainer.getTeleopDriveCommand().schedule();
         }
         Shuffleboard.selectTab("Testing");
+
+        RobotContainer.swerveDriveSubsystem.testInit();
+        RobotContainer.armSubsystem.testInit();
+        RobotContainer.gripperSubsystem.testInit();
+        RobotContainer.lightingSubsystem.testInit();
     }
 
     @Override
