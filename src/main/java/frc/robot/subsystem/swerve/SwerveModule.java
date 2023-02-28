@@ -2,6 +2,7 @@ package frc.robot.subsystem.swerve;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -13,7 +14,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 
 public class SwerveModule {
@@ -25,12 +25,8 @@ public class SwerveModule {
     private WPI_TalonFX swerveFalcon;
     private CANCoder encoder;
 
-    private double offset;
-
-    private PIDController driveController;
     private ProfiledPIDController swerveController;
 
-    private SimpleMotorFeedforward driveFeedForward;
     private SimpleMotorFeedforward swerveFeedForward;
 
     private String name;
@@ -40,23 +36,24 @@ public class SwerveModule {
      */
     public SwerveModule(SwerveModuleBuilder builder) {
         driveFalcon = new WPI_TalonFX(builder.driveMotorId);
-        swerveFalcon = new WPI_TalonFX(builder.swerveMotorId);
-        encoder = new CANCoder(builder.encoderId);
 
-        this.offset = builder.encoderOffset;
-        this.name = builder.name;
-
-        this.ENCODER_TICKS_PER_METER = builder.encoderTicksPerMeter;
-        this.MODULE_LOCATION = builder.moduleLocation;
-
-        driveController = new PIDController(builder.driveP, builder.driveI, builder.driveD);
-        swerveController = new ProfiledPIDController(builder.swerveP, builder.swerveI, builder.swerveD,
+        swerveFalcon = new WPI_TalonFX(builder.steerMotorId);
+        swerveFalcon.setInverted(true);
+        swerveController = new ProfiledPIDController(builder.steerP, builder.steerI, builder.steerD,
                 new TrapezoidProfile.Constraints(builder.maxAngleVel, builder.maxAngleAccel));
         swerveController.enableContinuousInput(0, 360);
-        encoder.setPositionToAbsolute();
-        swerveFalcon.setInverted(true);
-        driveFeedForward = new SimpleMotorFeedforward(0, 0);
+
         swerveFeedForward = new SimpleMotorFeedforward(0, 0);
+
+        encoder = new CANCoder(builder.absoluteEncoderId);
+        encoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
+        encoder.configMagnetOffset(builder.steerEncoderOffset);
+        encoder.setPositionToAbsolute();
+
+        name = builder.name;
+
+        ENCODER_TICKS_PER_METER = builder.driveEncoderTicksPerMeter;
+        MODULE_LOCATION = builder.moduleLocation;
     }
 
     /**
@@ -64,8 +61,8 @@ public class SwerveModule {
      * 
      * @return the direction the swerve module is pointing.
      */
-    public double getAngle() {
-        return encoder.getPosition() - offset;
+    public double getCurrentSteerAngle() {
+        return encoder.getPosition();
     }
 
     /**
@@ -75,8 +72,7 @@ public class SwerveModule {
      */
     public SwerveModulePosition getPosition() {
         double distance = driveFalcon.getSelectedSensorPosition() / ENCODER_TICKS_PER_METER;
-        SmartDashboard.putNumber(name + "Distance Meters", distance);
-        return new SwerveModulePosition(distance, Rotation2d.fromDegrees(getAngle()));
+        return new SwerveModulePosition(distance, Rotation2d.fromDegrees(getCurrentSteerAngle()));
     }
 
     /**
@@ -84,7 +80,7 @@ public class SwerveModule {
      * 
      * @return encoder velocity converted to m/s.
      */
-    public double getVelocity() {
+    public double getCurrentVelocity() {
         return driveFalcon.getSelectedSensorVelocity() * 10 / ENCODER_TICKS_PER_METER;
     }
 
@@ -98,19 +94,19 @@ public class SwerveModule {
      * @param state target state for the swerve module to be in.
      */
     public void fromModuleState(SwerveModuleState state) {
-        state = SwerveModuleState.optimize(state, Rotation2d.fromDegrees(getAngle()));
-        double driveFalconVoltage = driveController.calculate(getVelocity(), state.speedMetersPerSecond);
-        double swerveFalconVoltage = swerveController.calculate(getAngle(), state.angle.getDegrees())
-                + swerveFeedForward.calculate(swerveController.getSetpoint().velocity);
+        state = SwerveModuleState.optimize(state, Rotation2d.fromDegrees(getCurrentSteerAngle()));
+        double driveFalconVelocity = (state.speedMetersPerSecond * ENCODER_TICKS_PER_METER) * 10;
+        double swerveFalconVoltage = swerveController.calculate(getCurrentSteerAngle(), state.angle.getDegrees())
+                + swerveFeedForward.calculate(state.angle.getDegrees());
 
-        driveFalcon.set(ControlMode.PercentOutput, driveFalconVoltage);
+        driveFalcon.set(ControlMode.Velocity, driveFalconVelocity);
         swerveFalcon.setVoltage(swerveFalconVoltage);
 
         if (DriverStation.isTest()) {
             Robot.DEBUG_TAB.add(name + " Swerve Voltage", swerveFalconVoltage);
-            Robot.DEBUG_TAB.add(name + " Drive Voltage", driveFalconVoltage);
-            Robot.DEBUG_TAB.add(name + " Current Angle", getAngle());
-            Robot.DEBUG_TAB.add(name + " Current Velocity", getVelocity());
+            Robot.DEBUG_TAB.add(name + " Drive Voltage", driveFalconVelocity);
+            Robot.DEBUG_TAB.add(name + " Current Angle", getCurrentSteerAngle());
+            Robot.DEBUG_TAB.add(name + " Current Velocity", getCurrentVelocity());
             Robot.DEBUG_TAB.add(name + " Target Angle", state.angle.getDegrees());
             Robot.DEBUG_TAB.add(name + " Target Velocity",
                     state.speedMetersPerSecond);
@@ -125,17 +121,16 @@ public class SwerveModule {
         private Translation2d moduleLocation;
 
         private int driveMotorId;
-        private double driveP = 0.0, driveI = 0.0, driveD = 0.0;
 
-        private int swerveMotorId;
-        private double swerveP = 0.0, swerveI = 0.0, swerveD = 0.0;
+        private int steerMotorId;
+        private double steerP = 0.0, steerI = 0.0, steerD = 0.0;
 
         private double maxAngleAccel = 0.0;
         private double maxAngleVel = 0.0;
 
-        private int encoderId = 0;
-        private double encoderOffset = 0.0;
-        private double encoderTicksPerMeter = 0.0;
+        private int absoluteEncoderId = 0;
+        private double steerEncoderOffset = 0.0;
+        private double driveEncoderTicksPerMeter = 0.0;
 
         private String name = "";
 
@@ -148,23 +143,16 @@ public class SwerveModule {
             return this;
         }
 
-        public SwerveModuleBuilder setMotorIds(int driveMotorId, int swerveMotorId) {
+        public SwerveModuleBuilder setMotorIds(int driveMotorId, int steerMotorId) {
             this.driveMotorId = driveMotorId;
-            this.swerveMotorId = swerveMotorId;
+            this.steerMotorId = steerMotorId;
             return this;
         }
 
-        public SwerveModuleBuilder setDrivePID(double p, double i, double d) {
-            this.driveP = p;
-            this.driveI = i;
-            this.driveD = d;
-            return this;
-        }
-
-        public SwerveModuleBuilder setSwervePID(double p, double i, double d) {
-            this.swerveP = p;
-            this.swerveI = i;
-            this.swerveD = d;
+        public SwerveModuleBuilder setSteerPID(double p, double i, double d) {
+            this.steerP = p;
+            this.steerI = i;
+            this.steerD = d;
             return this;
         }
 
@@ -174,18 +162,18 @@ public class SwerveModule {
             return this;
         }
 
-        public SwerveModuleBuilder setEncoderId(int encoderId) {
-            this.encoderId = encoderId;
+        public SwerveModuleBuilder setAbsoluteEncoderId(int encoderId) {
+            this.absoluteEncoderId = encoderId;
             return this;
         }
 
-        public SwerveModuleBuilder setEncoderOffset(double offset) {
-            this.encoderOffset = offset;
+        public SwerveModuleBuilder setSteerEncoderOffset(double offset) {
+            this.steerEncoderOffset = offset;
             return this;
         }
 
-        public SwerveModuleBuilder setEncoderTicksPerMeter(double encoderTicksPerMeter) {
-            this.encoderTicksPerMeter = encoderTicksPerMeter;
+        public SwerveModuleBuilder setDriveEncoderTicksPerMeter(double encoderTicksPerMeter) {
+            this.driveEncoderTicksPerMeter = encoderTicksPerMeter;
             return this;
         }
 

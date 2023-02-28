@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Robot;
 
@@ -14,8 +15,11 @@ public class GripperSubsystem extends SubsystemBase {
     DoubleSolenoid gripperSolenoid;
     PneumaticHub pneumaticHub;
     SendableChooser<Boolean> isGripperEnabled = new SendableChooser<Boolean>();
+    CommandXboxController operatorController;
 
-    public GripperSubsystem() {
+    public GripperSubsystem(CommandXboxController operatorController) {
+        this.operatorController = operatorController;
+
         pneumaticHub = new PneumaticHub();
         pneumaticHub.enableCompressorDigital(); // Start the compressor
 
@@ -23,9 +27,13 @@ public class GripperSubsystem extends SubsystemBase {
                 Constants.GRIPPER_SOLENOID_CLOSE_ID);
         gripperSolenoid.set(Value.kReverse);
 
-        isGripperEnabled.addOption("Disabled", false);
-        isGripperEnabled.setDefaultOption("Enabled", true);
+        isGripperEnabled.setDefaultOption("Disabled", false);
+        isGripperEnabled.addOption("Enabled", true);
         Robot.TESTING_TAB.add("Gripper toggle", isGripperEnabled);
+    }
+
+    @Override
+    public void periodic() {
     }
 
     public void toggleGripper() {

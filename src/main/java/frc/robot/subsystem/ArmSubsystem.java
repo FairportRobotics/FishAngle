@@ -7,10 +7,13 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Robot;
 
-public class ArmSubsystem extends SubsystemBase{
+public class ArmSubsystem extends SubsystemBase {
+
+    CommandXboxController operatorController;
 
     TalonFX armFalcon;
     AnalogInput armPot;
@@ -22,53 +25,60 @@ public class ArmSubsystem extends SubsystemBase{
     PIDController wristPidController;
     SendableChooser<Boolean> isWristEnabled = new SendableChooser<Boolean>();
 
-    public ArmSubsystem(){
+    public ArmSubsystem(CommandXboxController operatorController) {
+        this.operatorController = operatorController;
+
         armFalcon = new TalonFX(Constants.ARM_FALCON_ID);
         armFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
         armPot = new AnalogInput(Constants.ARM_POT_ID);
-        armPidController = new PIDController(0, 0, 0); // TODO: Tune
+        armPidController = new PIDController(1, 0, 0.2); // TODO: Tune
 
-        isArmEnabled.setDefaultOption("Enabled", true);
-        isArmEnabled.addOption("Disabled", false);
+        isArmEnabled.addOption("Enabled", true);
+        isArmEnabled.setDefaultOption("Disabled", false);
         Robot.TESTING_TAB.add("Arm toggle", isArmEnabled);
 
         wristFalcon = new TalonFX(Constants.WRIST_FALCON_ID);
         wristFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
         wristPot = new AnalogInput(Constants.WRIST_POT_ID);
-        wristPidController = new PIDController(0, 0, 0); // TODO: Tune
+        wristPidController = new PIDController(1, 0, 0.2); // TODO: Tune
 
-        isWristEnabled.setDefaultOption("Enabled", true);
-        isWristEnabled.addOption("Disabled", false);
+        isWristEnabled.addOption("Enabled", true);
+        isWristEnabled.setDefaultOption("Disabled", false);
         Robot.TESTING_TAB.add("Wrist toggle", isWristEnabled);
     }
 
     @Override
     public void periodic() {
+        setArmPosition(getArmSetpoint() + (operatorController.getLeftY() * 10));
+        setWristPosition(getWristSetpoint() + (operatorController.getRightY() * 10));
 
         double armSpeed = armPidController.calculate(armPot.getValue());
         double wristSpeed = wristPidController.calculate(wristPot.getValue());
-        
-        if(armPot.getValue() >= Constants.ARM_MAX_POT_VALUE){
+
+        armSpeed = Math.min(-100, Math.max(armSpeed, 100));
+        wristSpeed = Math.min(-100, Math.max(wristSpeed, 100));
+
+        if (armPot.getValue() >= Constants.ARM_MAX_POT_VALUE) {
             armSpeed = Math.min(armSpeed, 0);
-        }else if(armPot.getValue() <= Constants.ARM_MIN_POT_VALUE){
+        } else if (armPot.getValue() <= Constants.ARM_MIN_POT_VALUE) {
             armSpeed = Math.max(armSpeed, 0);
         }
 
-        if(wristPot.getValue() >= Constants.WRIST_MAX_POT_VALUE){
+        if (wristPot.getValue() >= Constants.WRIST_MAX_POT_VALUE) {
             wristSpeed = Math.min(wristSpeed, 0);
-        }else if(wristPot.getValue() <= Constants.WRIST_MIN_POT_VALUE){
+        } else if (wristPot.getValue() <= Constants.WRIST_MIN_POT_VALUE) {
             wristSpeed = Math.max(wristSpeed, 0);
         }
 
-        if(DriverStation.isTest() && !isArmEnabled.getSelected())
+        if (DriverStation.isTest() && !isArmEnabled.getSelected())
             armSpeed = 0.0;
-        armFalcon.set(ControlMode.PercentOutput, armSpeed);
+        armFalcon.set(ControlMode.Velocity, armSpeed);
 
-        if(DriverStation.isTest() && !isWristEnabled.getSelected())
+        if (DriverStation.isTest() && !isWristEnabled.getSelected())
             wristSpeed = 0.0;
-        wristFalcon.set(ControlMode.PercentOutput, wristSpeed);
+        wristFalcon.set(ControlMode.Velocity, wristSpeed);
 
-        if(DriverStation.isTest()){
+        if (DriverStation.isTest()) {
             Robot.DEBUG_TAB.add("Arm Pos", armPot.getValue());
             Robot.DEBUG_TAB.add("Arm Speed", armSpeed);
 
@@ -78,12 +88,20 @@ public class ArmSubsystem extends SubsystemBase{
 
     }
 
-    public void setArmPosition(double pos){
+    public void setArmPosition(double pos) {
         armPidController.setSetpoint(pos);
     }
 
-    public void setWristPosition(double pos){
+    public double getArmSetpoint() {
+        return armPidController.getSetpoint();
+    }
+
+    public void setWristPosition(double pos) {
         wristPidController.setSetpoint(pos);
+    }
+
+    public double getWristSetpoint() {
+        return wristPidController.getSetpoint();
     }
 
 }

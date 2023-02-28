@@ -2,9 +2,9 @@ package frc.robot;
 
 public class Constants {
 
-    public static final int DRIVER_XBOX_CONTROLLER_ID = 1;
+    public static final int DRIVER_XBOX_CONTROLLER_ID = 0;
 
-    public static final int OPERATOR_XBOX_CONTROLLER_ID = 2;
+    public static final int OPERATOR_XBOX_CONTROLLER_ID = 1;
     public static final int OPERATOR_A_BTN = 1;
 
     public static final int ARM_FALCON_ID = 58;
@@ -17,23 +17,38 @@ public class Constants {
     public static final int WRIST_MAX_POT_VALUE = 2500;
     public static final int WRIST_MIN_POT_VALUE = 2000;
 
-    public static final int GRIPPER_SOLENOID_OPEN_ID = 1;
-    public static final int GRIPPER_SOLENOID_CLOSE_ID = 1;
+    
 
-    public static final int ARM_HIGH_POS_VAL = 2048;
-    public static final int WRIST_HIGH_POS_VAL = 2048;
+    public static final int ARM_HIGH_POS_VAL_CUBE = 2048;
+    public static final int WRIST_HIGH_POS_VAL_CUBE = 2048;
 
-    public static final int ARM_MID_POS_VAL = 1024;
-    public static final int WRIST_MID_POS_VAL = 1024;
+    public static final int ARM_MID_POS_VAL_CUBE = 1024;
+    public static final int WRIST_MID_POS_VAL_CUBE = 1024;
 
-    public static final int ARM_LOW_POS_VAL = 512;
-    public static final int WRIST_LOW_POS_VAL = 512;
+    public static final int ARM_LOW_POS_VAL_CUBE = 512;
+    public static final int WRIST_LOW_POS_VAL_CUBE = 512;
+
+
+
+    public static final int ARM_HIGH_POS_VAL_CONE = 2048;
+    public static final int WRIST_HIGH_POS_VAL_CONE = 2048;
+
+    public static final int ARM_MID_POS_VAL_CONE = 1024;
+    public static final int WRIST_MID_POS_VAL_CONE = 1024;
+
+    public static final int ARM_LOW_POS_VAL_CONE = 512;
+    public static final int WRIST_LOW_POS_VAL_CONE = 512;
+
+
 
     public static final int ARM_HOME_POS_VAL = 0;
     public static final int WRIST_HOME_POS_VAL = 0;
 
-    public static final int WHEEL_BASE = 20;
-    public static final double TRACK_WIDTH = 20;
+    public static final int GRIPPER_SOLENOID_OPEN_ID = 1;
+    public static final int GRIPPER_SOLENOID_CLOSE_ID = 1;
+
+    public static final double WHEEL_BASE = 20.0;
+    public static final double TRACK_WIDTH = 20.0;
 
     public static final int FRONT_LEFT_DRIVE_ID = 1;
     public static final int FRONT_LEFT_SWERVE_ID = 2;
@@ -62,28 +77,11 @@ public class Constants {
     public static final double ENCODER_TICKS_PER_METER = DRIVE_ENCODER_RESOLUTION * DRIVE_RATIO
             / (2 * Math.PI * WHEEL_RADIUS);
 
-    public static final double DEADBAND_TRANSLATE = 0.05;
-    public static final double DEADBAND_ROTATE = 0.05;
-
-    public static final double GO_TO_POSITION_PID_P = 1;
-    public static final double GO_TO_POSITION_PID_I = 0;
-    public static final double GO_TO_POSITION_PID_D = 0.5;
-
-    public static final double GO_TO_POSITION_MAX_VELOCITY = 1;
-    public static final double GO_TO_POSITION_MAX_ACCELERATION = 0.5;
-
     public static final double MAX_ANG_VEL = 360;
     public static final double MAX_ANG_ACC = 3600;
 
-    public static final double GO_TO_POSITION_ERROR = 0.3;
-    public static final double GO_TO_VELOCITY_ERROR = 0.1;
-
-    public static final double SWERVE_DRIVE_P = 0.3;
-    public static final double SWERVE_DRIVE_I = 0.0;
-    public static final double SWERVE_DRIVE_D = 0.0;
-
     public static final double SWERVE_STEER_P = 0.2;
     public static final double SWERVE_STEER_I = 0.0;
-    public static final double SWERVE_STEER_D = 0.0;
+    public static final double SWERVE_STEER_D = 0.1;
 
 }

@@ -1,6 +1,9 @@
 package frc.robot.subsystem.swerve;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -18,7 +21,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -26,6 +28,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
+
+    private final double MAX_SPEED_METERS_PER_SECOND;
+    private final double MAX_ROTATION_SPEED_RADIANS_PER_SECOND;
 
     private ArrayList<SwerveModule> modules;
 
@@ -45,6 +50,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         gyro = new AHRS();
 
+        MAX_SPEED_METERS_PER_SECOND = builder.maxSpeedMetersPerSecond;
+        MAX_ROTATION_SPEED_RADIANS_PER_SECOND = builder.maxRotationSpeedRadiansPerSecond;
+
         this.modules = builder.modules;
 
         kinematics = new SwerveDriveKinematics(
@@ -53,8 +61,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         odometry = new SwerveDriveOdometry(kinematics, Rotation2d.fromDegrees(-gyro.getYaw()),
                 this.modules.stream().map((x) -> x.getPosition()).toArray(SwerveModulePosition[]::new));
 
-        isDriveEnabled.addOption("Disabled", false);
-        isDriveEnabled.setDefaultOption("Enabled", true);
+        isDriveEnabled.setDefaultOption("Disabled", false);
+        isDriveEnabled.addOption("Enabled", true);
         Robot.TESTING_TAB.add("Drive toggle", isDriveEnabled);
     }
 
@@ -70,7 +78,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public void drive(double forward, double strafe, double rotate, double yaw) {
         if (DriverStation.isTest() && !isDriveEnabled.getSelected())
             return;
-        ChassisSpeeds velocity = ChassisSpeeds.fromFieldRelativeSpeeds(forward, strafe, rotate / 10,
+        ChassisSpeeds velocity = ChassisSpeeds.fromFieldRelativeSpeeds(forward * MAX_SPEED_METERS_PER_SECOND,
+                strafe * MAX_SPEED_METERS_PER_SECOND, rotate * MAX_ROTATION_SPEED_RADIANS_PER_SECOND,
                 Rotation2d.fromDegrees(-yaw));
         setModuleStates(velocity);
     }
@@ -87,8 +96,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         odometry.update(Rotation2d.fromDegrees(-gyro.getYaw()),
                 this.modules.stream().map((x) -> x.getPosition()).toArray(SwerveModulePosition[]::new));
 
-        
-        if(DriverStation.isTest()){
+        if (DriverStation.isTest()) {
             Robot.DEBUG_TAB.add("Odometry X Meters", odometry.getPoseMeters().getX());
             Robot.DEBUG_TAB.add("Odometry Y Meters", odometry.getPoseMeters().getY());
         }
@@ -144,7 +152,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @return Approximation of the speed.
      */
     public double getAverageVelocity() {
-        return this.modules.stream().map((x) -> Math.abs(x.getVelocity()))
+        return this.modules.stream().map((x) -> Math.abs(x.getCurrentVelocity()))
                 .collect(Collectors.summingDouble(Double::doubleValue)) / this.modules.size();
     }
 
@@ -164,9 +172,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         new PIDController(0, 0, 0),
                         this::setModuleStates,
                         true,
-                        this)
-
-        );
+                        this));
     }
 
     private void resetOdometry(Pose2d initialHolonomicPose) {
@@ -179,12 +185,25 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         private ArrayList<SwerveModule> modules;
 
+        private double maxSpeedMetersPerSecond = 5.0;
+        private double maxRotationSpeedRadiansPerSecond = 0.1;
+
         public SwerveDriveBuilder() {
             modules = new ArrayList<SwerveModule>();
         }
 
         public SwerveDriveBuilder addSwerveModule(SwerveModule module) {
             modules.add(module);
+            return this;
+        }
+
+        public SwerveDriveBuilder setMaxDriveSpeed(double maxSpeedMetersPerSecond){
+            this.maxSpeedMetersPerSecond = maxSpeedMetersPerSecond;
+            return this;
+        }
+
+        public SwerveDriveBuilder setMaxRotationSpeed(double maxRotationSpeedRadiansPerSecond){
+            this.maxRotationSpeedRadiansPerSecond = maxRotationSpeedRadiansPerSecond;
             return this;
         }
 
