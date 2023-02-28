@@ -1,30 +1,44 @@
 package frc.robot.subsystem.swerve;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+
+import com.fairportrobotics.frc.poe.CameraTracking.RobotFieldPosition;
 import com.kauailabs.navx.frc.AHRS;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Robot;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
     private static final double MAX_VOLTAGE = 12.0;
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 4.14528;
     public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
-            Math.hypot(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0, Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
+            Math.hypot(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
+                    Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
     private final SwerveModule frontLeftModule;
     private final SwerveModule frontRightModule;
@@ -44,10 +58,21 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                     -Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0));
     private final SwerveDriveOdometry odometry;
 
+    private RobotFieldPosition fieldPositionEstimator;
+    private Pose3d lastKnownFieldPos;
+
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
     public SwerveDriveSubsystem() {
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
+
+        try {
+            this.fieldPositionEstimator = new RobotFieldPosition("cameraName", new Transform3d(),
+                    AprilTagFields.k2023ChargedUp,
+                    PoseStrategy.CLOSEST_TO_LAST_POSE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         frontLeftModule = new MkSwerveModuleBuilder()
                 .withLayout(shuffleboardTab.getLayout("Front Left Module", BuiltInLayouts.kList)
@@ -96,18 +121,23 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         odometry = new SwerveDriveOdometry(
                 kinematics,
                 Rotation2d.fromDegrees(gyroscope.getFusedHeading()),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(), frontRightModule.getPosition(),
+                new SwerveModulePosition[] { frontLeftModule.getPosition(),
+                        frontRightModule.getPosition(),
                         backLeftModule.getPosition(), backRightModule.getPosition() });
 
         shuffleboardTab.addNumber("Gyroscope Angle", () -> getRotation().getDegrees());
-        shuffleboardTab.addNumber("Pose X", () -> odometry.getPoseMeters().getX());
-        shuffleboardTab.addNumber("Pose Y", () -> odometry.getPoseMeters().getY());
+        shuffleboardTab.addNumber("Odometry Pose X", () -> odometry.getPoseMeters().getX());
+        shuffleboardTab.addNumber("Odometry Pose Y", () -> odometry.getPoseMeters().getY());
+
+        shuffleboardTab.addNumber("Camera Pose X", () -> lastKnownFieldPos.getX());
+        shuffleboardTab.addNumber("Camera Pose Y", () -> lastKnownFieldPos.getY());
     }
 
     public void zeroGyroscope() {
         odometry.resetPosition(
                 Rotation2d.fromDegrees(gyroscope.getFusedHeading()),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(), frontRightModule.getPosition(),
+                new SwerveModulePosition[] { frontLeftModule.getPosition(),
+                        frontRightModule.getPosition(),
                         backLeftModule.getPosition(), backRightModule.getPosition() },
                 new Pose2d(odometry.getPoseMeters().getTranslation(), Rotation2d.fromDegrees(0.0)));
     }
@@ -120,7 +150,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         this.chassisSpeeds = chassisSpeeds;
     }
 
-    public Pose2d getPose(){
+    public Pose2d getPose() {
         return odometry.getPoseMeters();
     }
 
@@ -128,8 +158,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public void periodic() {
         odometry.update(
                 Rotation2d.fromDegrees(gyroscope.getFusedHeading()),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(), frontRightModule.getPosition(),
+                new SwerveModulePosition[] { frontLeftModule.getPosition(),
+                        frontRightModule.getPosition(),
                         backLeftModule.getPosition(), backRightModule.getPosition() });
+
+        Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
+        if (cameraPose.isPresent()) {
+            lastKnownFieldPos = cameraPose.get().estimatedPose;
+        }
 
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
 
