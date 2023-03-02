@@ -14,6 +14,7 @@ public class SwerveDriveCommand extends CommandBase {
     public SwerveDriveCommand() {
         this.driverController = RobotContainer.driverController;
         this.driveSubsystem = RobotContainer.swerveDriveSubsystem;
+        addRequirements(driveSubsystem);
     }
 
     @Override

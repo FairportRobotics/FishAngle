@@ -76,10 +76,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         .withSize(2, 4)
                         .withPosition(0, 0))
                 .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.FRONT_LEFT_DRIVE_ID)
-                .withSteerMotor(MotorType.FALCON, Constants.FRONT_LEFT_SWERVE_ID)
-                .withSteerEncoderPort(Constants.FRONT_LEFT_ENCODER_ID)
-                .withSteerOffset(Constants.FRONT_LEFT_SWERVE_OFFSET)
+                .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[0])
+                .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[0])
+                .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[0])
+                .withSteerOffset(Constants.SWERVE_OFFSETS[0])
                 .build();
 
         frontRightModule = new MkSwerveModuleBuilder()
@@ -87,10 +87,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         .withSize(2, 4)
                         .withPosition(2, 0))
                 .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.FRONT_RIGHT_DRIVE_ID)
-                .withSteerMotor(MotorType.FALCON, Constants.FRONT_RIGHT_SWERVE_ID)
-                .withSteerEncoderPort(Constants.FRONT_RIGHT_ENCODER_ID)
-                .withSteerOffset(Constants.FRONT_RIGHT_SWERVE_OFFSET)
+                .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[1])
+                .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[1])
+                .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[1])
+                .withSteerOffset(Constants.SWERVE_OFFSETS[1])
                 .build();
 
         backLeftModule = new MkSwerveModuleBuilder()
@@ -98,10 +98,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         .withSize(2, 4)
                         .withPosition(4, 0))
                 .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.BACK_LEFT_DRIVE_ID)
-                .withSteerMotor(MotorType.FALCON, Constants.BACK_LEFT_SWERVE_ID)
-                .withSteerEncoderPort(Constants.BACK_LEFT_ENCODER_ID)
-                .withSteerOffset(Constants.BACK_LEFT_SWERVE_OFFSET)
+                .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[2])
+                .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[2])
+                .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[2])
+                .withSteerOffset(Constants.SWERVE_OFFSETS[2])
                 .build();
 
         backRightModule = new MkSwerveModuleBuilder()
@@ -109,10 +109,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         .withSize(2, 4)
                         .withPosition(6, 0))
                 .withGearRatio(SdsModuleConfigurations.MK4I_L2)
-                .withDriveMotor(MotorType.FALCON, Constants.BACK_RIGHT_DRIVE_ID)
-                .withSteerMotor(MotorType.FALCON, Constants.BACK_RIGHT_SWERVE_ID)
-                .withSteerEncoderPort(Constants.BACK_RIGHT_ENCODER_ID)
-                .withSteerOffset(Constants.BACK_RIGHT_SWERVE_OFFSET)
+                .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[3])
+                .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[3])
+                .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[3])
+                .withSteerOffset(Constants.SWERVE_OFFSETS[3])
                 .build();
 
         odometry = new SwerveDriveOdometry(
@@ -171,8 +171,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         backLeftModule.getPosition(), backRightModule.getPosition() });
 
         Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
+        
         if (cameraPose.isPresent()) {
             lastKnownFieldPos = cameraPose.get().estimatedPose;
+        } else {
+            lastKnownFieldPos = new Pose3d(odometry.getPoseMeters());
         }
 
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);

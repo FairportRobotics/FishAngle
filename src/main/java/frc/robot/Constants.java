@@ -1,11 +1,12 @@
 package frc.robot;
 
+import frc.robot.RobotContainer.GamePiece;
+
 public class Constants {
 
     public static final int DRIVER_XBOX_CONTROLLER_ID = 0;
 
     public static final int OPERATOR_XBOX_CONTROLLER_ID = 1;
-    public static final int OPERATOR_A_BTN = 1;
 
     public static final int ARM_FALCON_ID = 58;
     public static final int ARM_POT_ID = 1;
@@ -18,28 +19,35 @@ public class Constants {
     public static final int WRIST_MIN_POT_VALUE = 2000;
 
 
+    public static final int[] ARM_HIGH_POS = new int[2];
+    public static final int[] ARM_MID_POS = new int[2];
+    public static final int[] ARM_LOW_POS = new int[2];
 
-    public static final int ARM_HIGH_POS_VAL_CUBE = 2048;
-    public static final int WRIST_HIGH_POS_VAL_CUBE = 2048;
+    public static final int[] WRIST_HIGH_POS = new int[2];
+    public static final int[] WRIST_MID_POS = new int[2];
+    public static final int[] WRIST_LOW_POS = new int[2];
 
-    public static final int ARM_MID_POS_VAL_CUBE = 1024;
-    public static final int WRIST_MID_POS_VAL_CUBE = 1024;
+    static {
 
-    public static final int ARM_LOW_POS_VAL_CUBE = 512;
-    public static final int WRIST_LOW_POS_VAL_CUBE = 512;
+        ARM_HIGH_POS[GamePiece.CONE.valueOf()] = 2048;
+        ARM_HIGH_POS[GamePiece.CUBE.valueOf()] = 2048;
 
+        ARM_MID_POS[GamePiece.CONE.valueOf()] = 1024;
+        ARM_MID_POS[GamePiece.CUBE.valueOf()] = 1024;
 
+        ARM_LOW_POS[GamePiece.CONE.valueOf()] = 512;
+        ARM_LOW_POS[GamePiece.CUBE.valueOf()] = 512;
 
-    public static final int ARM_HIGH_POS_VAL_CONE = 2048;
-    public static final int WRIST_HIGH_POS_VAL_CONE = 2048;
+        WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 2048;
+        WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 2048;
 
-    public static final int ARM_MID_POS_VAL_CONE = 1024;
-    public static final int WRIST_MID_POS_VAL_CONE = 1024;
+        WRIST_MID_POS[GamePiece.CONE.valueOf()] = 1024;
+        WRIST_MID_POS[GamePiece.CUBE.valueOf()] = 1024;
 
-    public static final int ARM_LOW_POS_VAL_CONE = 512;
-    public static final int WRIST_LOW_POS_VAL_CONE = 512;
-
-
+        WRIST_LOW_POS[GamePiece.CONE.valueOf()] = 512;
+        WRIST_LOW_POS[GamePiece.CUBE.valueOf()] = 512;
+        
+    }
 
     public static final int ARM_HOME_POS_VAL = 0;
     public static final int WRIST_HOME_POS_VAL = 0;
@@ -50,38 +58,37 @@ public class Constants {
     public static final double DRIVETRAIN_WHEELBASE_METERS = 0.508;
     public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.508;
 
-    public static final int FRONT_LEFT_DRIVE_ID = 1;
-    public static final int FRONT_LEFT_SWERVE_ID = 2;
-    public static final int FRONT_LEFT_ENCODER_ID = 3;
-    public static final double FRONT_LEFT_SWERVE_OFFSET = 104.062;
+    public static final int[] SWERVE_DRIVE_IDS = new int[4];
+    public static final int[] SWERVE_STEER_IDS = new int[4];
+    public static final int[] SWERVE_ENCODER_IDS = new int[4];
+    public static final double[] SWERVE_OFFSETS = new double[4];
 
-    public static final int FRONT_RIGHT_DRIVE_ID = 4;
-    public static final int FRONT_RIGHT_SWERVE_ID = 5;
-    public static final int FRONT_RIGHT_ENCODER_ID = 6;
-    public static final double FRONT_RIGHT_SWERVE_OFFSET = -12.393;
+    static {
 
-    public static final int BACK_LEFT_DRIVE_ID = 7;
-    public static final int BACK_LEFT_SWERVE_ID = 8;
-    public static final int BACK_LEFT_ENCODER_ID = 9;
-    public static final double BACK_LEFT_SWERVE_OFFSET = -161.895;
+        // Front Left
+        SWERVE_DRIVE_IDS[0] = 1;
+        SWERVE_STEER_IDS[0] = 2;
+        SWERVE_ENCODER_IDS[0] = 3;
+        SWERVE_OFFSETS[0] = 104.062;
 
-    public static final int BACK_RIGHT_DRIVE_ID = 10;
-    public static final int BACK_RIGHT_SWERVE_ID = 11;
-    public static final int BACK_RIGHT_ENCODER_ID = 12;
-    public static final double BACK_RIGHT_SWERVE_OFFSET = 291.533;
+        // Front Right
+        SWERVE_DRIVE_IDS[1] = 4;
+        SWERVE_STEER_IDS[1] = 5;
+        SWERVE_ENCODER_IDS[1] = 6;
+        SWERVE_OFFSETS[1] = -12.393;
 
-    public static final double WHEEL_RADIUS = .04;// in meters
-    public static final double DRIVE_RATIO = 8.14;
-    public static final double STEERING_RATIO = 7 / 150;
-    public static final double DRIVE_ENCODER_RESOLUTION = 2048;
-    public static final double ENCODER_TICKS_PER_METER = DRIVE_ENCODER_RESOLUTION * DRIVE_RATIO
-            / (2 * Math.PI * WHEEL_RADIUS);
+        // Back Left
+        SWERVE_DRIVE_IDS[2] = 7;
+        SWERVE_STEER_IDS[2] = 8;
+        SWERVE_ENCODER_IDS[2] = 9;
+        SWERVE_OFFSETS[2] = -161.895;
 
-    public static final double MAX_ANG_VEL = 360;
-    public static final double MAX_ANG_ACC = 3600;
+        // Back Right
+        SWERVE_DRIVE_IDS[3] = 10;
+        SWERVE_STEER_IDS[3] = 11;
+        SWERVE_ENCODER_IDS[3] = 12;
+        SWERVE_OFFSETS[3] = 291.533;
 
-    public static final double SWERVE_STEER_P = 0.2;
-    public static final double SWERVE_STEER_I = 0.0;
-    public static final double SWERVE_STEER_D = 0.1;
+    }
 
 }

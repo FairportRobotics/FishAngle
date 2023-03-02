@@ -30,22 +30,16 @@ public class ArmMoveToPositionCommand extends CommandBase {
                 wristPos = Constants.WRIST_HOME_POS_VAL;
                 break;
             case kLow:
-                armPos = requestedGamePiece == GamePiece.CONE ? Constants.ARM_LOW_POS_VAL_CONE
-                        : Constants.ARM_LOW_POS_VAL_CUBE;
-                wristPos = requestedGamePiece == GamePiece.CONE ? Constants.WRIST_LOW_POS_VAL_CONE
-                        : Constants.WRIST_LOW_POS_VAL_CUBE;
+                armPos = Constants.ARM_LOW_POS[requestedGamePiece.valueOf()];
+                wristPos = Constants.WRIST_LOW_POS[requestedGamePiece.valueOf()];
                 break;
             case kMid:
-                armPos = requestedGamePiece == GamePiece.CONE ? Constants.ARM_MID_POS_VAL_CONE
-                        : Constants.ARM_MID_POS_VAL_CUBE;
-                wristPos = requestedGamePiece == GamePiece.CONE ? Constants.WRIST_MID_POS_VAL_CONE
-                        : Constants.WRIST_MID_POS_VAL_CUBE;
+                armPos = Constants.ARM_MID_POS[requestedGamePiece.valueOf()];
+                wristPos = Constants.WRIST_MID_POS[requestedGamePiece.valueOf()];
                 break;
             case kHigh:
-                armPos = requestedGamePiece == GamePiece.CONE ? Constants.ARM_HIGH_POS_VAL_CONE
-                        : Constants.ARM_HIGH_POS_VAL_CUBE;
-                wristPos = requestedGamePiece == GamePiece.CONE ? Constants.WRIST_HIGH_POS_VAL_CONE
-                        : Constants.WRIST_HIGH_POS_VAL_CUBE;
+                armPos = Constants.ARM_HIGH_POS[requestedGamePiece.valueOf()];
+                wristPos = Constants.WRIST_HIGH_POS[requestedGamePiece.valueOf()];
                 break;
             default:
                 break;

@@ -97,6 +97,16 @@ public class RobotContainer {
     }
 
     public enum GamePiece {
-        CONE, CUBE
+        CONE(0), CUBE(1);
+
+        int i;
+
+        private GamePiece(int i){
+            this.i = i;
+        }
+
+        public int valueOf(){
+            return i;
+        }
     }
 }

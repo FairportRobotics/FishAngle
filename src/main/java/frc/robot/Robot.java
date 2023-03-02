@@ -48,12 +48,11 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
+        RobotContainer.swerveDriveSubsystem.zeroGyroscope();
+
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
         }
-
-        RobotContainer.swerveDriveSubsystem.zeroGyroscope();
-
     }
 
     @Override
