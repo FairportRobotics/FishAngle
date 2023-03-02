@@ -3,6 +3,8 @@ package frc.robot.subsystem.swerve;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
@@ -188,5 +190,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 states[2].angle.getRadians());
         backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
                 states[3].angle.getRadians());
+
+        // Logging
+        Logger.getInstance().recordOutput("SwerveModuleStates", states);
+        Logger.getInstance().recordOutput("Pose3d", lastKnownFieldPos);
     }
 }

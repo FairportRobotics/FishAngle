@@ -1,5 +1,7 @@
 package frc.robot.subsystem;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.math.controller.PIDController;
@@ -81,19 +83,15 @@ public class ArmSubsystem extends SubsystemBase {
             currentWristSpeed = 0.0;
         wristFalcon.set(ControlMode.Velocity, currentWristSpeed);
 
-    }
+        Logger.getInstance().recordOutput("Arm setpoint", armPidController.getSetpoint());
+        Logger.getInstance().recordOutput("Arm Position", armPot.getValue());
+        Logger.getInstance().recordOutput("Arm Speed", currentArmSpeed);
+        Logger.getInstance().recordOutput("Arm at position", armPidController.atSetpoint());
 
-    public void testInit() {
-        Robot.TESTING_TAB.add("Wrist toggle", isWristEnabled);
-        Robot.DEBUG_TAB.addNumber("Arm setpoint", armPidController::getSetpoint);
-        Robot.DEBUG_TAB.addNumber("Arm Pos", armPot::getValue);
-        Robot.DEBUG_TAB.addNumber("Arm Speed", () -> currentArmSpeed);
-        Robot.DEBUG_TAB.addBoolean("Arm set", armPidController::atSetpoint);
-
-        Robot.DEBUG_TAB.addNumber("Wrist setpoint", wristPidController::getSetpoint);
-        Robot.DEBUG_TAB.addNumber("Wrist Pos", wristPot::getValue);
-        Robot.DEBUG_TAB.addNumber("Wrist Speed", () -> currentWristSpeed);
-        Robot.DEBUG_TAB.addBoolean("Wrist set", wristPidController::atSetpoint);
+        Logger.getInstance().recordOutput("Wrist setpoint", wristPidController.getSetpoint());
+        Logger.getInstance().recordOutput("Wrist Position", wristPot.getValue());
+        Logger.getInstance().recordOutput("Wrist Speed", currentWristSpeed);
+        Logger.getInstance().recordOutput("Wrist at position", wristPidController.atSetpoint());
     }
 
     public void setArmPosition(double pos) {

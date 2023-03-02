@@ -1,5 +1,7 @@
 package frc.robot.subsystem;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PneumaticHub;
@@ -33,6 +35,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        Logger.getInstance().recordOutput("Gripper State", gripperSolenoid.get().toString());
     }
 
     public void testInit() {

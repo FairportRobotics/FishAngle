@@ -46,7 +46,7 @@ public class Constants {
 
         WRIST_LOW_POS[GamePiece.CONE.valueOf()] = 512;
         WRIST_LOW_POS[GamePiece.CUBE.valueOf()] = 512;
-        
+
     }
 
     public static final int ARM_HOME_POS_VAL = 0;
@@ -89,6 +89,19 @@ public class Constants {
         SWERVE_ENCODER_IDS[3] = 12;
         SWERVE_OFFSETS[3] = 291.533;
 
+    }
+
+    public static final Mode currentMode = Mode.SIM;
+
+    public static enum Mode {
+      /** Running on a real robot. */
+      REAL,
+  
+      /** Running a physics simulator. */
+      SIM,
+  
+      /** Replaying from a log file. */
+      REPLAY
     }
 
 }
