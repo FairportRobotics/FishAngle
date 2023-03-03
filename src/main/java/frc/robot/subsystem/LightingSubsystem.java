@@ -12,13 +12,8 @@ public class LightingSubsystem extends SubsystemBase {
     public LightingSubsystem() {
         lightingController = new ArduinoLightingController(9600, Port.kUSB);
     }
-
-    public void testInit(){
-
-    }
     
-//Color rgb values have to be a multiple of 5 otherwise the arduino will never get the color correct
-    
+    //Color rgb values have to be a multiple of 5 otherwise the arduino will never get the color correct
     public void setCubeColor() {
         this.lightingController.fillAll("155060180");
     }

@@ -99,7 +99,7 @@ public class RobotContainer {
     public enum GamePiece {
         CONE(0), CUBE(1);
 
-        int i;
+        private int i;
 
         private GamePiece(int i){
             this.i = i;

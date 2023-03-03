@@ -3,7 +3,6 @@ package frc.robot.subsystem.swerve;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -160,10 +159,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         System.out.println("BackRight: " + backRightModule.getSteerAngle());
     }
 
-    public void testInit() {
-
-    }
-
     @Override
     public void periodic() {
         odometry.update(
@@ -173,9 +168,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         backLeftModule.getPosition(), backRightModule.getPosition() });
 
         Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
-        
+
         if (cameraPose.isPresent()) {
             lastKnownFieldPos = cameraPose.get().estimatedPose;
+            Logger.getInstance().recordOutput("PhotonVision Field Position", cameraPose.get().estimatedPose);
         } else {
             lastKnownFieldPos = new Pose3d(odometry.getPoseMeters());
         }
@@ -193,6 +189,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         // Logging
         Logger.getInstance().recordOutput("SwerveModuleStates", states);
-        Logger.getInstance().recordOutput("Pose3d", lastKnownFieldPos);
+        Logger.getInstance().recordOutput("Last Known Field Position", lastKnownFieldPos);
+        Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());
     }
 }

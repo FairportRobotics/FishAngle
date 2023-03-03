@@ -6,12 +6,14 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
-import frc.robot.Robot;
 
 public class ArmSubsystem extends SubsystemBase {
 
@@ -20,14 +22,16 @@ public class ArmSubsystem extends SubsystemBase {
     TalonFX armFalcon;
     AnalogInput armPot;
     PIDController armPidController;
-    SendableChooser<Boolean> isArmEnabled = new SendableChooser<Boolean>();
     double currentArmSpeed = 0.0;
 
     TalonFX wristFalcon;
     AnalogInput wristPot;
     PIDController wristPidController;
-    SendableChooser<Boolean> isWristEnabled = new SendableChooser<Boolean>();
     double currentWristSpeed = 0.0;
+
+    Mechanism2d armMechanism2d;
+    MechanismLigament2d armLig;
+    MechanismLigament2d wristLig;
 
     public ArmSubsystem(CommandXboxController operatorController) {
         this.operatorController = operatorController;
@@ -35,12 +39,8 @@ public class ArmSubsystem extends SubsystemBase {
         armFalcon = new TalonFX(Constants.ARM_FALCON_ID);
         armFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
         armPot = new AnalogInput(Constants.ARM_POT_ID);
-        armPidController = new PIDController(1, 0, 0.2); // TODO: Tune
+        armPidController = new PIDController(.001, 0, 0.2); // TODO: Tune
         armPidController.setTolerance(100);
-
-        isArmEnabled.addOption("Enabled", true);
-        isArmEnabled.setDefaultOption("Disabled", false);
-        Robot.TESTING_TAB.add("Arm toggle", isArmEnabled);
 
         wristFalcon = new TalonFX(Constants.WRIST_FALCON_ID);
         wristFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
@@ -48,19 +48,27 @@ public class ArmSubsystem extends SubsystemBase {
         wristPidController = new PIDController(1, 0, 0.2); // TODO: Tune
         wristPidController.setTolerance(100);
 
-        isWristEnabled.addOption("Enabled", true);
-        isWristEnabled.setDefaultOption("Disabled", false);
+        armMechanism2d = new Mechanism2d(10, 10);
+        MechanismRoot2d root = armMechanism2d.getRoot("Arm", 7, 5);
+
+        armLig = root.append(new MechanismLigament2d("Arm", 3, 180, 10, new Color8Bit(Color.kBlue)));
+        wristLig = armLig.append(new MechanismLigament2d("Wrist", 1, 180, 10, new Color8Bit(Color.kPurple)));
     }
 
     @Override
     public void periodic() {
+
+        // TODO: Map Potentiometer angle to wrist and arm angles
+        //wristLig.setAngle(wristPot.getValue());
+        //armLig.setAngle(armPot.getValue());
+
         setArmPosition(getArmSetpoint() + (operatorController.getLeftY() * 10));
         setWristPosition(getWristSetpoint() + (operatorController.getRightY() * 10));
 
         currentArmSpeed = armPidController.calculate(armPot.getValue());
         currentWristSpeed = wristPidController.calculate(wristPot.getValue());
 
-        currentArmSpeed = Math.max(-100, Math.min(currentArmSpeed, 100));
+        currentArmSpeed = Math.max(-0.25, Math.min(currentArmSpeed, 0.25));
         currentWristSpeed = Math.max(-100, Math.min(currentWristSpeed, 100));
 
         if (armPot.getValue() >= Constants.ARM_MAX_POT_VALUE) {
@@ -75,12 +83,6 @@ public class ArmSubsystem extends SubsystemBase {
             currentWristSpeed = Math.max(currentWristSpeed, 0);
         }
 
-        if (DriverStation.isTest() && !isArmEnabled.getSelected())
-            currentArmSpeed = 0.0;
-        armFalcon.set(ControlMode.Velocity, currentArmSpeed);
-
-        if (DriverStation.isTest() && !isWristEnabled.getSelected())
-            currentWristSpeed = 0.0;
         wristFalcon.set(ControlMode.Velocity, currentWristSpeed);
 
         Logger.getInstance().recordOutput("Arm setpoint", armPidController.getSetpoint());
@@ -92,6 +94,8 @@ public class ArmSubsystem extends SubsystemBase {
         Logger.getInstance().recordOutput("Wrist Position", wristPot.getValue());
         Logger.getInstance().recordOutput("Wrist Speed", currentWristSpeed);
         Logger.getInstance().recordOutput("Wrist at position", wristPidController.atSetpoint());
+
+        Logger.getInstance().recordOutput("Arm Mechanism", armMechanism2d);
     }
 
     public void setArmPosition(double pos) {

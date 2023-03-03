@@ -22,9 +22,7 @@ public class Robot extends LoggedRobot {
 
     private RobotContainer m_robotContainer;
 
-    public static ShuffleboardTab TESTING_TAB = Shuffleboard.getTab("Testing");
     public static ShuffleboardTab MAIN_TAB = Shuffleboard.getTab("Main");
-    public static ShuffleboardTab DEBUG_TAB = Shuffleboard.getTab("Debug");
 
     @Override
     public void robotInit() {
@@ -121,6 +119,7 @@ public class Robot extends LoggedRobot {
             RobotContainer.lightingSubsystem.setCubeColor();
         }
 
+        Logger.getInstance().recordOutput("Requested GamePiece", RobotContainer.requestedGamePiece.toString());
     }
 
     @Override
@@ -134,10 +133,6 @@ public class Robot extends LoggedRobot {
             m_robotContainer.getTeleopDriveCommand().schedule();
         }
         Shuffleboard.selectTab("Testing");
-
-        RobotContainer.swerveDriveSubsystem.testInit();
-        RobotContainer.gripperSubsystem.testInit();
-        RobotContainer.lightingSubsystem.testInit();
     }
 
     @Override
