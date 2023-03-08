@@ -34,6 +34,8 @@ public class RobotContainer {
     public static final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
 
+
+
     private final SendableChooser<Command> autoChooser;
 
     private SwerveDriveCommand swerveDriveCommand;
@@ -97,7 +99,7 @@ public class RobotContainer {
     }
 
     public enum GamePiece {
-        CONE(0), CUBE(1);
+        NONE(-1), CONE(0), CUBE(1);
 
         private int i;
 
