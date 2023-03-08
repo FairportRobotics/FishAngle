@@ -57,7 +57,6 @@ public class ArmSubsystem extends SubsystemBase {
         pneumaticHub = RobotContainer.pneumaticHub;
         brakeSolenoid = pneumaticHub.makeSolenoid(Constants.ARM_BRAKE_SOLENOID);
 
-
         armMechanism2d = new Mechanism2d(10, 10);
         MechanismRoot2d root = armMechanism2d.getRoot("Arm", 7, 5);
 
@@ -93,12 +92,21 @@ public class ArmSubsystem extends SubsystemBase {
             currentWristSpeed = Math.max(currentWristSpeed, 0);
         }
 
+        if(armPidController.atSetpoint()){
+            brakeSolenoid.set(true);
+        }else{
+            brakeSolenoid.set(false);
+        }
+
+        armFalcon.set(ControlMode.Velocity, currentArmSpeed);
         wristFalcon.set(ControlMode.Velocity, currentWristSpeed);
 
         Logger.getInstance().recordOutput("Arm setpoint", armPidController.getSetpoint());
         Logger.getInstance().recordOutput("Arm Position", armPot.getValue());
         Logger.getInstance().recordOutput("Arm Speed", currentArmSpeed);
         Logger.getInstance().recordOutput("Arm at position", armPidController.atSetpoint());
+
+        Logger.getInstance().recordOutput("Arm Brake State", brakeSolenoid.get());
 
         Logger.getInstance().recordOutput("Wrist setpoint", wristPidController.getSetpoint());
         Logger.getInstance().recordOutput("Wrist Position", wristPot.getValue());
