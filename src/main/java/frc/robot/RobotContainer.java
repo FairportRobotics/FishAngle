@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -34,6 +35,7 @@ public class RobotContainer {
     public static final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
 
+    public static final PneumaticHub pneumaticHub = new PneumaticHub();
 
 
     private final SendableChooser<Command> autoChooser;
@@ -62,6 +64,8 @@ public class RobotContainer {
 
         initCommands();
         configureBindings();
+
+        pneumaticHub.enableCompressorDigital();
     }
 
     private void initCommands() {

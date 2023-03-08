@@ -6,6 +6,8 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.PneumaticHub;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -14,6 +16,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 public class ArmSubsystem extends SubsystemBase {
 
@@ -33,6 +36,9 @@ public class ArmSubsystem extends SubsystemBase {
     MechanismLigament2d armLig;
     MechanismLigament2d wristLig;
 
+    PneumaticHub pneumaticHub;
+    Solenoid brakeSolenoid;
+
     public ArmSubsystem(CommandXboxController operatorController) {
         this.operatorController = operatorController;
 
@@ -47,6 +53,10 @@ public class ArmSubsystem extends SubsystemBase {
         wristPot = new AnalogInput(Constants.WRIST_POT_ID);
         wristPidController = new PIDController(1, 0, 0.2); // TODO: Tune
         wristPidController.setTolerance(100);
+
+        pneumaticHub = RobotContainer.pneumaticHub;
+        brakeSolenoid = pneumaticHub.makeSolenoid(Constants.ARM_BRAKE_SOLENOID);
+
 
         armMechanism2d = new Mechanism2d(10, 10);
         MechanismRoot2d root = armMechanism2d.getRoot("Arm", 7, 5);

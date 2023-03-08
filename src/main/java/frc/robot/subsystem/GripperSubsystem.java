@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.RobotContainer.GamePiece;
 
 public class GripperSubsystem extends SubsystemBase {
@@ -29,8 +30,8 @@ public class GripperSubsystem extends SubsystemBase {
     private final int MAX_BLUE_CUBE = 211;
 
     DoubleSolenoid gripperSolenoid;
-    PneumaticHub pneumaticHub;
     CommandXboxController operatorController;
+    PneumaticHub pneumaticHub;
     TCS34725 colorSensor;
 
     private GamePiece foundGamePiece;
@@ -38,9 +39,7 @@ public class GripperSubsystem extends SubsystemBase {
     public GripperSubsystem(CommandXboxController operatorController) {
         this.operatorController = operatorController;
 
-        pneumaticHub = new PneumaticHub();
-        pneumaticHub.enableCompressorDigital(); // Start the compressor
-
+        pneumaticHub = RobotContainer.pneumaticHub;
         gripperSolenoid = pneumaticHub.makeDoubleSolenoid(Constants.GRIPPER_SOLENOID_OPEN_ID,
                 Constants.GRIPPER_SOLENOID_CLOSE_ID);
         gripperSolenoid.set(Value.kReverse);

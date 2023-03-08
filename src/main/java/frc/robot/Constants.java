@@ -52,6 +52,8 @@ public class Constants {
     public static final int ARM_HOME_POS_VAL = 0;
     public static final int WRIST_HOME_POS_VAL = 0;
 
+    public static final int ARM_BRAKE_SOLENOID = 3;
+
     public static final int GRIPPER_SOLENOID_OPEN_ID = 1;
     public static final int GRIPPER_SOLENOID_CLOSE_ID = 1;
 
@@ -91,7 +93,7 @@ public class Constants {
 
     }
 
-    public static final Mode currentMode = Mode.SIM;
+    public static final Mode CURRENT_MODE = Mode.SIM;
 
     public static enum Mode {
       /** Running on a real robot. */
