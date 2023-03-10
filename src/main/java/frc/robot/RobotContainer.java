@@ -30,13 +30,12 @@ public class RobotContainer {
     public static final CommandXboxController driverController = new CommandXboxController(Constants.DRIVER_XBOX_CONTROLLER_ID);
     public static final CommandXboxController operatorController = new CommandXboxController(Constants.OPERATOR_XBOX_CONTROLLER_ID);
 
+    public static final PneumaticHub pneumaticHub = new PneumaticHub();
+
     public static final ArmSubsystem armSubsystem = new ArmSubsystem(operatorController);
     public static final GripperSubsystem gripperSubsystem = new GripperSubsystem(operatorController);
     public static final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
-
-    public static final PneumaticHub pneumaticHub = new PneumaticHub();
-
 
     private final SendableChooser<Command> autoChooser;
 

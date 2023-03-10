@@ -15,6 +15,7 @@ import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -61,6 +62,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
+    private SlewRateLimiter simVelocityX;
+    private SlewRateLimiter simVelocityY;
+
     public SwerveDriveSubsystem() {
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
         lastKnownFieldPos = new Pose3d();
@@ -76,7 +80,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 .withLayout(shuffleboardTab.getLayout("Front Left Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
+                .withGearRatio(SdsModuleConfigurations.MK4I_L1)
                 .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[0])
                 .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[0])
                 .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[0])
@@ -87,7 +91,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 .withLayout(shuffleboardTab.getLayout("Front Right Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(2, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
+                .withGearRatio(SdsModuleConfigurations.MK4I_L1)
                 .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[1])
                 .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[1])
                 .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[1])
@@ -98,7 +102,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 .withLayout(shuffleboardTab.getLayout("Back Left Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(4, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
+                .withGearRatio(SdsModuleConfigurations.MK4I_L1)
                 .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[2])
                 .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[2])
                 .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[2])
@@ -109,7 +113,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 .withLayout(shuffleboardTab.getLayout("Back Right Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(6, 0))
-                .withGearRatio(SdsModuleConfigurations.MK4I_L2)
+                .withGearRatio(SdsModuleConfigurations.MK4I_L1)
                 .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[3])
                 .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[3])
                 .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[3])
@@ -122,6 +126,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 new SwerveModulePosition[] { frontLeftModule.getPosition(),
                         frontRightModule.getPosition(),
                         backLeftModule.getPosition(), backRightModule.getPosition() });
+
+        simVelocityX = new SlewRateLimiter(10);
+        simVelocityY = new SlewRateLimiter(10);
 
         shuffleboardTab.addNumber("Gyroscope Angle", () -> getRotation().getDegrees());
         shuffleboardTab.addNumber("Odometry Pose X", () -> odometry.getPoseMeters().getX());
@@ -140,6 +147,18 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 new Pose2d(odometry.getPoseMeters().getTranslation(), Rotation2d.fromDegrees(0.0)));
     }
 
+    public void setOdometry(Pose2d newPosition) {
+        odometry.resetPosition(
+                newPosition.getRotation(),
+                new SwerveModulePosition[] {
+                        frontLeftModule.getPosition(),
+                        frontRightModule.getPosition(),
+                        backLeftModule.getPosition(),
+                        backRightModule.getPosition()
+                },
+                new Pose2d(newPosition.getTranslation(), newPosition.getRotation()));
+    }
+
     public Rotation2d getRotation() {
         return odometry.getPoseMeters().getRotation();
     }
@@ -149,7 +168,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+        return lastKnownFieldPos.toPose2d();
     }
 
     public void printOffsets() {
@@ -157,6 +176,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         System.out.println("FrontRight: " + frontRightModule.getSteerAngle());
         System.out.println("BackLeft: " + backLeftModule.getSteerAngle());
         System.out.println("BackRight: " + backRightModule.getSteerAngle());
+    }
+
+    public void lockWheels() {
+        
     }
 
     @Override
@@ -171,7 +194,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         if (cameraPose.isPresent()) {
             lastKnownFieldPos = cameraPose.get().estimatedPose;
-            Logger.getInstance().recordOutput("PhotonVision Field Position", cameraPose.get().estimatedPose);
+            Logger.getInstance().recordOutput("PhotonVision Field Position",
+                    cameraPose.get().estimatedPose);
         } else {
             lastKnownFieldPos = new Pose3d(odometry.getPoseMeters());
         }
@@ -191,5 +215,24 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         Logger.getInstance().recordOutput("SwerveModuleStates", states);
         Logger.getInstance().recordOutput("Last Known Field Position", lastKnownFieldPos);
         Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        double x = getPose().getX();
+        double y = getPose().getY();
+        Rotation2d rotation = getRotation();
+
+        double targetVelX = (chassisSpeeds.vxMetersPerSecond * Math.cos(rotation.getRadians())
+                - chassisSpeeds.vyMetersPerSecond * Math.sin(rotation.getRadians()));
+        double targetVelY = (chassisSpeeds.vxMetersPerSecond * Math.sin(rotation.getRadians())
+                + chassisSpeeds.vyMetersPerSecond * Math.cos(rotation.getRadians()));
+        Rotation2d dRotation = Rotation2d.fromRadians(-chassisSpeeds.omegaRadiansPerSecond * 0.02);
+
+        x += simVelocityX.calculate(targetVelX) * 0.02;
+        y += simVelocityY.calculate(targetVelY) * 0.02;
+        rotation = rotation.rotateBy(dRotation);
+
+        this.setOdometry(new Pose2d(x, y, rotation));
     }
 }

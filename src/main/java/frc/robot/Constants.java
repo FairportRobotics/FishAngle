@@ -57,8 +57,8 @@ public class Constants {
     public static final int GRIPPER_SOLENOID_OPEN_ID = 1;
     public static final int GRIPPER_SOLENOID_CLOSE_ID = 1;
 
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.508;
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.508;
+    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.4826;
+    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5842;
 
     public static final int[] SWERVE_DRIVE_IDS = new int[4];
     public static final int[] SWERVE_STEER_IDS = new int[4];

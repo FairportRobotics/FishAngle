@@ -11,6 +11,7 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -84,7 +85,7 @@ public class Robot extends LoggedRobot {
     public void autonomousInit() {
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-        RobotContainer.swerveDriveSubsystem.zeroGyroscope();
+        RobotContainer.swerveDriveSubsystem.setOdometry(new Pose2d());
 
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();

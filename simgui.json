@@ -8,6 +8,7 @@
   },
   "NTProvider": {
     "types": {
+      "/AdvantageKit/RealOutputs/Arm Mechanism": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/GripperSubsystem": "Subsystem",
       "/LiveWindow/LightingSubsystem": "Subsystem",
@@ -51,11 +52,19 @@
       "/LiveWindow/Ungrouped/Talon FX [8]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [9]": "Motor Controller",
       "/LiveWindow/Ungrouped/navX-Sensor[4]": "Gyro",
+      "/Shuffleboard/Main/SendableChooser[0]": "String Chooser",
       "/Shuffleboard/Main/SendableChooser[3]": "String Chooser",
       "/Shuffleboard/Testing/Arm toggle": "String Chooser",
       "/Shuffleboard/Testing/Drive toggle": "String Chooser",
       "/Shuffleboard/Testing/Gripper toggle": "String Chooser",
       "/Shuffleboard/Testing/Wrist toggle": "String Chooser"
+    },
+    "windows": {
+      "/Shuffleboard/Main/SendableChooser[0]": {
+        "window": {
+          "visible": true
+        }
+      }
     }
   },
   "NetworkTables": {
