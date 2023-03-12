@@ -66,6 +66,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private SlewRateLimiter simVelocityY;
 
     public SwerveDriveSubsystem() {
+
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
         lastKnownFieldPos = new Pose3d();
         try {
@@ -148,15 +149,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public void setOdometry(Pose2d newPosition) {
-        odometry.resetPosition(
-                newPosition.getRotation(),
-                new SwerveModulePosition[] {
-                        frontLeftModule.getPosition(),
-                        frontRightModule.getPosition(),
-                        backLeftModule.getPosition(),
-                        backRightModule.getPosition()
-                },
-                new Pose2d(newPosition.getTranslation(), newPosition.getRotation()));
+    //     odometry.resetPosition(
+    //             newPosition.getRotation(),
+    //             new SwerveModulePosition[] {
+    //                     frontLeftModule.getPosition(),
+    //                     frontRightModule.getPosition(),
+    //                     backLeftModule.getPosition(),
+    //                     backRightModule.getPosition()
+    //             },
+    //             new Pose2d(newPosition.getTranslation(), newPosition.getRotation()));
     }
 
     public Rotation2d getRotation() {
@@ -168,14 +169,18 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return lastKnownFieldPos.toPose2d();
+        return odometry.getPoseMeters();
     }
 
     public void printOffsets() {
-        System.out.println("FrontLeft: " + frontLeftModule.getSteerAngle());
+        System.out.println("FrontLeft: " + frontLeftModule.getSteerEncoder().getAbsoluteAngle());
         System.out.println("FrontRight: " + frontRightModule.getSteerAngle());
         System.out.println("BackLeft: " + backLeftModule.getSteerAngle());
         System.out.println("BackRight: " + backRightModule.getSteerAngle());
+    }
+
+    public AHRS getGyro(){
+        return gyroscope;
     }
 
     public void lockWheels() {
@@ -215,6 +220,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         Logger.getInstance().recordOutput("SwerveModuleStates", states);
         Logger.getInstance().recordOutput("Last Known Field Position", lastKnownFieldPos);
         Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());
+        Logger.getInstance().recordOutput("Gyro Heading", gyroscope.getFusedHeading());
+        Logger.getInstance().recordOutput("Gyro Yaw", gyroscope.getYaw());
     }
 
     @Override

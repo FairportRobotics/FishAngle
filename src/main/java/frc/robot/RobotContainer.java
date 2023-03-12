@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,14 +31,13 @@ public class RobotContainer {
     public static final CommandXboxController driverController = new CommandXboxController(Constants.DRIVER_XBOX_CONTROLLER_ID);
     public static final CommandXboxController operatorController = new CommandXboxController(Constants.OPERATOR_XBOX_CONTROLLER_ID);
 
-    public static final PneumaticHub pneumaticHub = new PneumaticHub();
+    public static final PneumaticHub pneumaticHub = new PneumaticHub(Constants.PH_CAN_ID);
+    public static final Compressor COMPRESSOR = pneumaticHub.makeCompressor();
 
     public static final ArmSubsystem armSubsystem = new ArmSubsystem(operatorController);
     public static final GripperSubsystem gripperSubsystem = new GripperSubsystem(operatorController);
     public static final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
-    public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
-
-    private final SendableChooser<Command> autoChooser;
+    //public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
 
     private SwerveDriveCommand swerveDriveCommand;
 
@@ -52,19 +52,11 @@ public class RobotContainer {
     public static GamePiece requestedGamePiece = GamePiece.CONE;
 
     public RobotContainer() {
-        autoChooser = new SendableChooser<Command>();
-        autoChooser.addOption("None", Commands.print("No auto command selected"));
-        autoChooser.addOption("Leave Zone", new LeaveZoneAutoCommand());
-        autoChooser.addOption("Leave Zone and Charge", new LeaveZoneAndChargeAutoCommand());
-        autoChooser.addOption("One Cone", new OneConeAutoCommand());
-        autoChooser.addOption("One Cube", new OneCubeAutoCommand());
-        autoChooser.setDefaultOption("Two Cube", new TwoCubeAutoCommand());
-        Robot.MAIN_TAB.add(autoChooser);
 
         initCommands();
         configureBindings();
 
-        pneumaticHub.enableCompressorDigital();
+        COMPRESSOR.enableDigital();
     }
 
     private void initCommands() {
@@ -90,15 +82,11 @@ public class RobotContainer {
         gamePieceToggleBtn = operatorController.rightBumper();
         gamePieceToggleBtn.onTrue(Commands.runOnce(() -> {
             requestedGamePiece = requestedGamePiece == GamePiece.CONE ? GamePiece.CUBE : GamePiece.CONE;
-        }, lightingSubsystem));
+        }));
     }
 
     public Command getTeleopDriveCommand() {
         return swerveDriveCommand;
-    }
-
-    public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
     }
 
     public enum GamePiece {

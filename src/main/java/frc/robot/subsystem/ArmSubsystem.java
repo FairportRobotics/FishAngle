@@ -4,7 +4,11 @@ import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -27,7 +31,7 @@ public class ArmSubsystem extends SubsystemBase {
     PIDController armPidController;
     double currentArmSpeed = 0.0;
 
-    TalonFX wristFalcon;
+    TalonSRX wristFalcon;
     AnalogInput wristPot;
     PIDController wristPidController;
     double currentWristSpeed = 0.0;
@@ -44,15 +48,16 @@ public class ArmSubsystem extends SubsystemBase {
 
         armFalcon = new TalonFX(Constants.ARM_FALCON_ID);
         armFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
+        armFalcon.setSelectedSensorPosition(0);
         armPot = new AnalogInput(Constants.ARM_POT_ID);
-        armPidController = new PIDController(.001, 0, 0.2); // TODO: Tune
-        armPidController.setTolerance(100);
+        armPidController = new PIDController(0.0015, 0.0015, 0.0); // TODO: Tune
+        armPidController.setTolerance(50);
 
-        wristFalcon = new TalonFX(Constants.WRIST_FALCON_ID);
-        wristFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
+        wristFalcon = new TalonSRX(Constants.WRIST_FALCON_ID);
+        wristFalcon.setInverted(true); // Flip this to true if it's driving the wrong way
         wristPot = new AnalogInput(Constants.WRIST_POT_ID);
-        wristPidController = new PIDController(1, 0, 0.2); // TODO: Tune
-        wristPidController.setTolerance(100);
+        wristPidController = new PIDController(0.0015, 0, 0); // TODO: Tune
+        wristPidController.setTolerance(50);
 
         pneumaticHub = RobotContainer.pneumaticHub;
         brakeSolenoid = pneumaticHub.makeSolenoid(Constants.ARM_BRAKE_SOLENOID);
@@ -71,14 +76,14 @@ public class ArmSubsystem extends SubsystemBase {
         //wristLig.setAngle(wristPot.getValue());
         //armLig.setAngle(armPot.getValue());
 
-        setArmPosition(getArmSetpoint() + (operatorController.getLeftY() * 10));
-        setWristPosition(getWristSetpoint() + (operatorController.getRightY() * 10));
+        setArmPosition(getArmSetpoint() - (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) * 10));
+        setWristPosition(getWristSetpoint() + (MathUtil.applyDeadband(operatorController.getRightY(), 0.1) * 10));
 
         currentArmSpeed = armPidController.calculate(armPot.getValue());
         currentWristSpeed = wristPidController.calculate(wristPot.getValue());
 
-        currentArmSpeed = Math.max(-0.25, Math.min(currentArmSpeed, 0.25));
-        currentWristSpeed = Math.max(-100, Math.min(currentWristSpeed, 100));
+        currentArmSpeed = Math.max(-0.5, Math.min(currentArmSpeed, 0.5));
+        currentWristSpeed = Math.max(-0.75, Math.min(currentWristSpeed, 0.75));
 
         if (armPot.getValue() >= Constants.ARM_MAX_POT_VALUE) {
             currentArmSpeed = Math.min(currentArmSpeed, 0);
@@ -98,15 +103,15 @@ public class ArmSubsystem extends SubsystemBase {
             brakeSolenoid.set(false);
         }
 
-        armFalcon.set(ControlMode.Velocity, currentArmSpeed);
-        wristFalcon.set(ControlMode.Velocity, currentWristSpeed);
+        armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
+        wristFalcon.set(ControlMode.PercentOutput, currentWristSpeed);
 
         Logger.getInstance().recordOutput("Arm setpoint", armPidController.getSetpoint());
         Logger.getInstance().recordOutput("Arm Position", armPot.getValue());
         Logger.getInstance().recordOutput("Arm Speed", currentArmSpeed);
         Logger.getInstance().recordOutput("Arm at position", armPidController.atSetpoint());
 
-        Logger.getInstance().recordOutput("Arm Brake State", brakeSolenoid.get());
+        //Logger.getInstance().recordOutput("Arm Brake State", brakeSolenoid.get());
 
         Logger.getInstance().recordOutput("Wrist setpoint", wristPidController.getSetpoint());
         Logger.getInstance().recordOutput("Wrist Position", wristPot.getValue());
@@ -117,6 +122,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public void setArmPosition(double pos) {
+        pos = Math.max(Constants.ARM_MIN_POT_VALUE, Math.min(pos, Constants.ARM_MAX_POT_VALUE));
         armPidController.setSetpoint(pos);
     }
 
@@ -125,6 +131,9 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public void setWristPosition(double pos) {
+        
+        pos = Math.max(Constants.WRIST_MIN_POT_VALUE, Math.min(pos, Constants.WRIST_MAX_POT_VALUE));
+
         wristPidController.setSetpoint(pos);
     }
 

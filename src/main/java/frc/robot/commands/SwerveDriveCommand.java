@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -19,13 +20,16 @@ public class SwerveDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        double x = driverController.getLeftX() * Math.abs(driverController.getLeftX());
-        double y = driverController.getLeftY() * Math.abs(driverController.getLeftY());
-
+        double strafe = driverController.getLeftX() * Math.abs(driverController.getLeftX());
+        double forward = driverController.getLeftY() * Math.abs(driverController.getLeftY());
         double rot = driverController.getRightX() * Math.abs(driverController.getRightX());
 
+        forward = MathUtil.applyDeadband(forward, 0.1);
+        strafe = MathUtil.applyDeadband(strafe, 0.1);
+        rot = MathUtil.applyDeadband(rot, 0.1);
+
         driveSubsystem.drive(
-                ChassisSpeeds.fromFieldRelativeSpeeds(x, y, rot, driveSubsystem.getRotation()));
+                ChassisSpeeds.fromFieldRelativeSpeeds(forward * 1, strafe * 1, rot * 3, driveSubsystem.getRotation()));
 
     }
 

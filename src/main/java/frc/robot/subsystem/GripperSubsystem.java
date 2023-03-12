@@ -2,9 +2,6 @@ package frc.robot.subsystem;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.fairportrobotics.frc.poe.sensors.colorsensors.TCS34725;
-import com.fairportrobotics.frc.poe.sensors.colorsensors.TCS34725.TCS34725_RGB;
-
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -32,9 +29,9 @@ public class GripperSubsystem extends SubsystemBase {
     DoubleSolenoid gripperSolenoid;
     CommandXboxController operatorController;
     PneumaticHub pneumaticHub;
-    TCS34725 colorSensor;
+    //TCS34725 colorSensor;
 
-    private GamePiece foundGamePiece;
+    private GamePiece foundGamePiece = GamePiece.NONE;
 
     public GripperSubsystem(CommandXboxController operatorController) {
         this.operatorController = operatorController;
@@ -44,15 +41,15 @@ public class GripperSubsystem extends SubsystemBase {
                 Constants.GRIPPER_SOLENOID_CLOSE_ID);
         gripperSolenoid.set(Value.kReverse);
 
-        colorSensor = new TCS34725();
+        //colorSensor = new TCS34725();
     }
 
     @Override
     public void periodic() {
 
-        TCS34725_RGB currentColor = colorSensor.getRGB();
+        //TCS34725_RGB currentColor = colorSensor.getRGB();
 
-        foundGamePiece = checkColors(currentColor.getR(), currentColor.getG(), currentColor.getB());
+        //foundGamePiece = checkColors(currentColor.getR(), currentColor.getG(), currentColor.getB());
 
         // Logger
         Logger.getInstance().recordOutput("Gripper State", gripperSolenoid.get().toString());

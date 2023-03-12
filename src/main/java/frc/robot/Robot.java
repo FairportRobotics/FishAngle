@@ -14,9 +14,18 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer.GamePiece;
+import frc.robot.commands.ArmMoveToPositionCommand;
+import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
+import frc.robot.commands.autonomus.LeaveZoneAndChargeAutoCommand;
+import frc.robot.commands.autonomus.LeaveZoneAutoCommand;
+import frc.robot.commands.autonomus.OneConeAutoCommand;
+import frc.robot.commands.autonomus.OneCubeAutoCommand;
+import frc.robot.commands.autonomus.TwoCubeAutoCommand;
 
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
@@ -24,6 +33,8 @@ public class Robot extends LoggedRobot {
     private RobotContainer m_robotContainer;
 
     public static ShuffleboardTab MAIN_TAB = Shuffleboard.getTab("Main");
+
+    private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();;
 
     @Override
     public void robotInit() {
@@ -60,17 +71,31 @@ public class Robot extends LoggedRobot {
         logger.start();
 
         m_robotContainer = new RobotContainer();
-        Shuffleboard.selectTab("Main");
+
+        autoChooser.addOption("None", Commands.print("No auto command selected"));
+        autoChooser.addOption("Leave Zone", new LeaveZoneAutoCommand());
+        autoChooser.addOption("Leave Zone and Charge", new LeaveZoneAndChargeAutoCommand());
+        autoChooser.addOption("One Cone", new OneConeAutoCommand());
+        autoChooser.addOption("One Cube", new OneCubeAutoCommand());
+        autoChooser.setDefaultOption("Two Cube", new TwoCubeAutoCommand());
+
+        Robot.MAIN_TAB.add(autoChooser);
+
+
+        RobotContainer.swerveDriveSubsystem.getGyro().zeroYaw();
+
     }
 
     @Override
     public void robotPeriodic() {
+
+
         CommandScheduler.getInstance().run();
     }
 
     @Override
     public void disabledInit() {
-        RobotContainer.lightingSubsystem.rainbow();
+        //RobotContainer.lightingSubsystem.rainbow();
     }
 
     @Override
@@ -83,7 +108,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+        m_autonomousCommand = autoChooser.getSelected();
 
         RobotContainer.swerveDriveSubsystem.setOdometry(new Pose2d());
 
@@ -105,7 +130,9 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
-        RobotContainer.swerveDriveSubsystem.zeroGyroscope();
+        //RobotContainer.swerveDriveSubsystem.zeroGyroscope();
+
+        new ArmMoveToPositionCommand(ArmPosition.kHome).schedule();
     }
 
     @Override
@@ -115,9 +142,9 @@ public class Robot extends LoggedRobot {
         }
 
         if (RobotContainer.requestedGamePiece == GamePiece.CONE) {
-            RobotContainer.lightingSubsystem.setConeColor();
+            //RobotContainer.lightingSubsystem.setConeColor();
         } else if (RobotContainer.requestedGamePiece == GamePiece.CUBE) {
-            RobotContainer.lightingSubsystem.setCubeColor();
+            //RobotContainer.lightingSubsystem.setCubeColor();
         }
 
         Logger.getInstance().recordOutput("Requested GamePiece", RobotContainer.requestedGamePiece.toString());
@@ -133,7 +160,8 @@ public class Robot extends LoggedRobot {
         if (!m_robotContainer.getTeleopDriveCommand().isScheduled()) {
             m_robotContainer.getTeleopDriveCommand().schedule();
         }
-        Shuffleboard.selectTab("Testing");
+
+        RobotContainer.swerveDriveSubsystem.getGyro().calibrate();
     }
 
     @Override
