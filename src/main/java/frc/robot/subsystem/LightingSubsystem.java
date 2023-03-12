@@ -10,7 +10,7 @@ public class LightingSubsystem extends SubsystemBase {
     ArduinoLightingController lightingController;
 
     public LightingSubsystem() {
-        lightingController = new ArduinoLightingController(9600, Port.kUSB);
+        lightingController = new ArduinoLightingController(9600, Port.kUSB1);
     }
     
     //Color rgb values have to be a multiple of 5 otherwise the arduino will never get the color correct

@@ -23,7 +23,7 @@ public class Constants {
     public static final int ARM_FALCON_ID = 20;
     public static final int ARM_POT_ID = 1;
     public static final int ARM_MAX_POT_VALUE = 3690;
-    public static final int ARM_MIN_POT_VALUE = 5;
+    public static final int ARM_MIN_POT_VALUE = 0;
 
     public static final int WRIST_FALCON_ID = 50;
     public static final int WRIST_POT_ID = 0;
@@ -44,8 +44,8 @@ public class Constants {
         ARM_HIGH_POS[GamePiece.CONE.valueOf()] = 2048;
         ARM_HIGH_POS[GamePiece.CUBE.valueOf()] = 2048;
 
-        ARM_MID_POS[GamePiece.CONE.valueOf()] = 630;
-        ARM_MID_POS[GamePiece.CUBE.valueOf()] = 630;
+        ARM_MID_POS[GamePiece.CONE.valueOf()] = 822;
+        ARM_MID_POS[GamePiece.CUBE.valueOf()] = 822;
 
         ARM_LOW_POS[GamePiece.CONE.valueOf()] = 30;
         ARM_LOW_POS[GamePiece.CUBE.valueOf()] = 30;
@@ -61,7 +61,7 @@ public class Constants {
 
     }
 
-    public static final int ARM_HOME_POS_VAL = 5;
+    public static final int ARM_HOME_POS_VAL = -50;
     public static final int WRIST_HOME_POS_VAL = 375;
 
     public static final int ARM_BRAKE_SOLENOID = 4;

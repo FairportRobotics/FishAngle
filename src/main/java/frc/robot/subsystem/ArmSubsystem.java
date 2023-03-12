@@ -3,6 +3,7 @@ package frc.robot.subsystem;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -48,8 +49,9 @@ public class ArmSubsystem extends SubsystemBase {
         armFalcon = new TalonFX(Constants.ARM_FALCON_ID);
         armFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
         armFalcon.setSelectedSensorPosition(0);
+        armFalcon.setNeutralMode(NeutralMode.Brake);
         armPot = new AnalogInput(Constants.ARM_POT_ID);
-        armPidController = new PIDController(0.0015, 0.0015, 0.0); // TODO: Tune
+        armPidController = new PIDController(0.010, 0.0001, 0.00001); // TODO: Tune
         armPidController.setTolerance(50);
 
         wristFalcon = new TalonSRX(Constants.WRIST_FALCON_ID);
@@ -97,6 +99,7 @@ public class ArmSubsystem extends SubsystemBase {
 
         if(armPidController.atSetpoint()){
             brakeSolenoid.set(true);
+            currentArmSpeed = 0.0;
         }else{
             brakeSolenoid.set(false);
         }
