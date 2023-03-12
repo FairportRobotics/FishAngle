@@ -101,10 +101,10 @@ public class ArmSubsystem extends SubsystemBase {
             brakeSolenoid.set(false);
         }
 
-            
+
         armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
 
-        if (Math.abs(MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) * 10)  < 0.1)
+        if (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) == 0.0)
         {
             wristFalcon.set(ControlMode.PercentOutput, currentWristSpeed);
         }
