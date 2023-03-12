@@ -15,9 +15,9 @@ import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -26,6 +26,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -55,10 +56,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                     Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0),
             new Translation2d(-Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
                     -Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0));
+
     private final SwerveDriveOdometry odometry;
+    private final SwerveDrivePoseEstimator poseEstimator;
 
     private RobotFieldPosition fieldPositionEstimator;
-    private Pose3d lastKnownFieldPos;
 
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
@@ -68,7 +70,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public SwerveDriveSubsystem() {
 
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
-        lastKnownFieldPos = new Pose3d();
         try {
             this.fieldPositionEstimator = new RobotFieldPosition("cameraName", new Transform3d(),
                     AprilTagFields.k2023ChargedUp,
@@ -122,42 +123,46 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 .build();
 
         odometry = new SwerveDriveOdometry(
-                kinematics,
-                Rotation2d.fromDegrees(gyroscope.getFusedHeading()),
+                kinematics, getCorrectedHeading(),
                 new SwerveModulePosition[] { frontLeftModule.getPosition(),
                         frontRightModule.getPosition(),
                         backLeftModule.getPosition(), backRightModule.getPosition() });
 
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, getCorrectedHeading(),
+                new SwerveModulePosition[] { frontLeftModule.getPosition(),
+                        frontRightModule.getPosition(),
+                        backLeftModule.getPosition(), backRightModule.getPosition() },
+                new Pose2d());
+
         simVelocityX = new SlewRateLimiter(10);
         simVelocityY = new SlewRateLimiter(10);
-
-        shuffleboardTab.addNumber("Gyroscope Angle", () -> getRotation().getDegrees());
-        shuffleboardTab.addNumber("Odometry Pose X", () -> odometry.getPoseMeters().getX());
-        shuffleboardTab.addNumber("Odometry Pose Y", () -> odometry.getPoseMeters().getY());
-
-        shuffleboardTab.addNumber("Camera Pose X", () -> lastKnownFieldPos.getX());
-        shuffleboardTab.addNumber("Camera Pose Y", () -> lastKnownFieldPos.getY());
     }
 
     public void zeroGyroscope() {
-        odometry.resetPosition(
-                Rotation2d.fromDegrees(gyroscope.getFusedHeading()),
+        odometry.resetPosition(getCorrectedHeading(),
                 new SwerveModulePosition[] { frontLeftModule.getPosition(),
                         frontRightModule.getPosition(),
                         backLeftModule.getPosition(), backRightModule.getPosition() },
                 new Pose2d(odometry.getPoseMeters().getTranslation(), Rotation2d.fromDegrees(0.0)));
+
+        poseEstimator.resetPosition(getCorrectedHeading(),
+                new SwerveModulePosition[] { frontLeftModule.getPosition(),
+                        frontRightModule.getPosition(),
+                        backLeftModule.getPosition(), backRightModule.getPosition() },
+                new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), Rotation2d.fromDegrees(0.0)));
     }
 
-    public void setOdometry(Pose2d newPosition) {
-    //     odometry.resetPosition(
-    //             newPosition.getRotation(),
-    //             new SwerveModulePosition[] {
-    //                     frontLeftModule.getPosition(),
-    //                     frontRightModule.getPosition(),
-    //                     backLeftModule.getPosition(),
-    //                     backRightModule.getPosition()
-    //             },
-    //             new Pose2d(newPosition.getTranslation(), newPosition.getRotation()));
+    public void resetOdometry(Pose2d newPose2d) {
+        odometry.resetPosition(getCorrectedHeading(),
+                new SwerveModulePosition[] { frontLeftModule.getPosition(),
+                        frontRightModule.getPosition(),
+                        backLeftModule.getPosition(), backRightModule.getPosition() },
+                newPose2d);
+        poseEstimator.resetPosition(getCorrectedHeading(),
+                new SwerveModulePosition[] { frontLeftModule.getPosition(),
+                        frontRightModule.getPosition(),
+                        backLeftModule.getPosition(), backRightModule.getPosition() },
+                newPose2d);
     }
 
     public Rotation2d getRotation() {
@@ -169,7 +174,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
+    }
+
+    public Rotation2d getCorrectedHeading() {
+        return gyroscope.getRotation2d();
     }
 
     public void printOffsets() {
@@ -179,18 +188,19 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         System.out.println("BackRight: " + backRightModule.getSteerAngle());
     }
 
-    public AHRS getGyro(){
-        return gyroscope;
-    }
-
     public void lockWheels() {
-        
+
     }
 
     @Override
     public void periodic() {
         odometry.update(
-                Rotation2d.fromDegrees(gyroscope.getFusedHeading()),
+                getCorrectedHeading(),
+                new SwerveModulePosition[] { frontLeftModule.getPosition(),
+                        frontRightModule.getPosition(),
+                        backLeftModule.getPosition(), backRightModule.getPosition() });
+
+        poseEstimator.update(getCorrectedHeading(),
                 new SwerveModulePosition[] { frontLeftModule.getPosition(),
                         frontRightModule.getPosition(),
                         backLeftModule.getPosition(), backRightModule.getPosition() });
@@ -198,11 +208,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
 
         if (cameraPose.isPresent()) {
-            lastKnownFieldPos = cameraPose.get().estimatedPose;
+            poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(), Timer.getFPGATimestamp());
             Logger.getInstance().recordOutput("PhotonVision Field Position",
                     cameraPose.get().estimatedPose);
-        } else {
-            lastKnownFieldPos = new Pose3d(odometry.getPoseMeters());
         }
 
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
@@ -218,10 +226,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         // Logging
         Logger.getInstance().recordOutput("SwerveModuleStates", states);
-        Logger.getInstance().recordOutput("Last Known Field Position", lastKnownFieldPos);
         Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());
+        Logger.getInstance().recordOutput("Pose Estimator", poseEstimator.getEstimatedPosition());
         Logger.getInstance().recordOutput("Gyro Heading", gyroscope.getFusedHeading());
         Logger.getInstance().recordOutput("Gyro Yaw", gyroscope.getYaw());
+        Logger.getInstance().recordOutput("Gyro Angle", gyroscope.getAngle());
     }
 
     @Override
@@ -240,6 +249,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         y += simVelocityY.calculate(targetVelY) * 0.02;
         rotation = rotation.rotateBy(dRotation);
 
-        this.setOdometry(new Pose2d(x, y, rotation));
+        this.resetOdometry(new Pose2d(x, y, rotation));
     }
 }

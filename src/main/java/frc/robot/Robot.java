@@ -81,9 +81,6 @@ public class Robot extends LoggedRobot {
 
         Robot.MAIN_TAB.add(autoChooser);
 
-
-        RobotContainer.swerveDriveSubsystem.getGyro().zeroYaw();
-
     }
 
     @Override
@@ -109,8 +106,6 @@ public class Robot extends LoggedRobot {
     @Override
     public void autonomousInit() {
         m_autonomousCommand = autoChooser.getSelected();
-
-        RobotContainer.swerveDriveSubsystem.setOdometry(new Pose2d());
 
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
@@ -160,8 +155,6 @@ public class Robot extends LoggedRobot {
         if (!m_robotContainer.getTeleopDriveCommand().isScheduled()) {
             m_robotContainer.getTeleopDriveCommand().schedule();
         }
-
-        RobotContainer.swerveDriveSubsystem.getGyro().calibrate();
     }
 
     @Override

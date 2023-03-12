@@ -4,6 +4,18 @@ import frc.robot.RobotContainer.GamePiece;
 
 public class Constants {
 
+    public static final Mode CURRENT_MODE = Mode.SIM;
+    public static enum Mode {
+      /** Running on a real robot. */
+      REAL,
+  
+      /** Running a physics simulator. */
+      SIM,
+  
+      /** Replaying from a log file. */
+      REPLAY
+    }
+
     public static final int DRIVER_XBOX_CONTROLLER_ID = 0;
 
     public static final int OPERATOR_XBOX_CONTROLLER_ID = 1;
@@ -93,19 +105,10 @@ public class Constants {
 
     }
 
-    public static final Mode CURRENT_MODE = Mode.REAL;
-
     public static final int PH_CAN_ID = 18;
 
-    public static enum Mode {
-      /** Running on a real robot. */
-      REAL,
-  
-      /** Running a physics simulator. */
-      SIM,
-  
-      /** Replaying from a log file. */
-      REPLAY
-    }
+    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 1 : 0;
+    public static final double PP_PID_I = CURRENT_MODE == Mode.REAL ? 0 : 0;
+    public static final double PP_PID_D = CURRENT_MODE == Mode.REAL ? 0 : 0;
 
 }
