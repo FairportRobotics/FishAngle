@@ -76,7 +76,6 @@ public class ArmSubsystem extends SubsystemBase {
         //armLig.setAngle(armPot.getValue());
 
         setArmPosition(getArmSetpoint() - (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) * 10));
-        setWristPosition(getWristSetpoint() + (MathUtil.applyDeadband(operatorController.getRightY(), 0.1) * 10));
 
         currentArmSpeed = armPidController.calculate(armPot.getValue());
         currentWristSpeed = wristPidController.calculate(wristPot.getValue());
@@ -102,8 +101,18 @@ public class ArmSubsystem extends SubsystemBase {
             brakeSolenoid.set(false);
         }
 
+            
         armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
-        wristFalcon.set(ControlMode.PercentOutput, currentWristSpeed);
+
+        if (Math.abs(MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) * 10)  < 0.1)
+        {
+            wristFalcon.set(ControlMode.PercentOutput, currentWristSpeed);
+        }
+        else  // manual override
+        {
+            currentWristSpeed = operatorController.getRightY()*0.75;
+            wristFalcon.set(ControlMode.PercentOutput, currentWristSpeed);
+        }
 
         Logger.getInstance().recordOutput("Arm setpoint", armPidController.getSetpoint());
         Logger.getInstance().recordOutput("Arm Position", armPot.getValue());
