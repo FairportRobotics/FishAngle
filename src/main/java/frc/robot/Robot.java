@@ -91,7 +91,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void disabledInit() {
-        //RobotContainer.lightingSubsystem.rainbow();
+        RobotContainer.lightingSubsystem.rainbow();
     }
 
     @Override
@@ -136,9 +136,9 @@ public class Robot extends LoggedRobot {
         }
 
         if (RobotContainer.requestedGamePiece == GamePiece.CONE) {
-            //RobotContainer.lightingSubsystem.setConeColor();
+            RobotContainer.lightingSubsystem.setConeColor();
         } else if (RobotContainer.requestedGamePiece == GamePiece.CUBE) {
-            //RobotContainer.lightingSubsystem.setCubeColor();
+            RobotContainer.lightingSubsystem.setCubeColor();
         }
 
         Logger.getInstance().recordOutput("Requested GamePiece", RobotContainer.requestedGamePiece.toString());

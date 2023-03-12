@@ -1,5 +1,7 @@
 package frc.robot.subsystem;
 
+//import org.apache.commons.lang3.ObjectUtils.Null;
+
 import com.fairportrobotics.frc.poe.controllers.lighting.ArduinoLightingController;
 
 import edu.wpi.first.wpilibj.SerialPort.Port;
@@ -10,24 +12,43 @@ public class LightingSubsystem extends SubsystemBase {
     ArduinoLightingController lightingController;
 
     public LightingSubsystem() {
-        lightingController = new ArduinoLightingController(9600, Port.kUSB);
+        try {
+            lightingController = new ArduinoLightingController(9600, Port.kUSB);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                lightingController = new ArduinoLightingController(9600, Port.kUSB1);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+                try {
+                    lightingController = new ArduinoLightingController(9600, Port.kUSB2);
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                    lightingController = null;
+                }
+            }
+        }  
     }
     
     //Color rgb values have to be a multiple of 5 otherwise the arduino will never get the color correct
     public void setCubeColor() {
-        this.lightingController.fillAll("155060180");
+        if (lightingController != null)
+            this.lightingController.fillAll("155060180");
     }
 
     public void setConeColor() {
-        this.lightingController.fillAll("235185000");
+        if (lightingController != null)
+            this.lightingController.fillAll("235185000");
     }
 
     public void rainbow() {
-        this.lightingController.fillRainbow();
+        if (lightingController != null)
+            this.lightingController.fillRainbow();
     }
 
     public void off(){
-        this.lightingController.fillAll("000000000");
+        if (lightingController != null)
+            this.lightingController.fillAll("000000000");
     }
 
 }

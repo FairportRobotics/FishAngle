@@ -17,6 +17,7 @@ import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
 import frc.robot.commands.GripperCommand.GripperAction;
 import frc.robot.subsystem.ArmSubsystem;
 import frc.robot.subsystem.GripperSubsystem;
+import frc.robot.subsystem.LightingSubsystem;
 import frc.robot.subsystem.swerve.SwerveDriveSubsystem;
 
 public class RobotContainer {
@@ -30,7 +31,7 @@ public class RobotContainer {
     public static final ArmSubsystem armSubsystem = new ArmSubsystem(operatorController);
     public static final GripperSubsystem gripperSubsystem = new GripperSubsystem(operatorController);
     public static final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
-    //public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
+    public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
 
     private SwerveDriveCommand swerveDriveCommand;
 
