@@ -181,13 +181,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return gyroscope.getRotation2d();
     }
 
-    public void printOffsets() {
-        System.out.println("FrontLeft: " + frontLeftModule.getSteerEncoder().getAbsoluteAngle());
-        System.out.println("FrontRight: " + frontRightModule.getSteerAngle());
-        System.out.println("BackLeft: " + backLeftModule.getSteerAngle());
-        System.out.println("BackRight: " + backRightModule.getSteerAngle());
-    }
-
     public void lockWheels() {
 
     }

@@ -6,7 +6,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticHub;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -16,14 +15,8 @@ import frc.robot.commands.GripperCommand;
 import frc.robot.commands.SwerveDriveCommand;
 import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
 import frc.robot.commands.GripperCommand.GripperAction;
-import frc.robot.commands.autonomus.LeaveZoneAndChargeAutoCommand;
-import frc.robot.commands.autonomus.LeaveZoneAutoCommand;
-import frc.robot.commands.autonomus.OneConeAutoCommand;
-import frc.robot.commands.autonomus.OneCubeAutoCommand;
-import frc.robot.commands.autonomus.TwoCubeAutoCommand;
 import frc.robot.subsystem.ArmSubsystem;
 import frc.robot.subsystem.GripperSubsystem;
-import frc.robot.subsystem.LightingSubsystem;
 import frc.robot.subsystem.swerve.SwerveDriveSubsystem;
 
 public class RobotContainer {

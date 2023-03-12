@@ -29,7 +29,7 @@ public class GripperSubsystem extends SubsystemBase {
     DoubleSolenoid gripperSolenoid;
     CommandXboxController operatorController;
     PneumaticHub pneumaticHub;
-    //TCS34725 colorSensor;
+    // TCS34725 colorSensor;
 
     private GamePiece foundGamePiece = GamePiece.NONE;
 
@@ -41,15 +41,16 @@ public class GripperSubsystem extends SubsystemBase {
                 Constants.GRIPPER_SOLENOID_CLOSE_ID);
         gripperSolenoid.set(Value.kReverse);
 
-        //colorSensor = new TCS34725();
+        // colorSensor = new TCS34725();
     }
 
     @Override
     public void periodic() {
 
-        //TCS34725_RGB currentColor = colorSensor.getRGB();
+        // TCS34725_RGB currentColor = colorSensor.getRGB();
 
-        //foundGamePiece = checkColors(currentColor.getR(), currentColor.getG(), currentColor.getB());
+        // foundGamePiece = checkColors(currentColor.getR(), currentColor.getG(),
+        // currentColor.getB());
 
         // Logger
         Logger.getInstance().recordOutput("Gripper State", gripperSolenoid.get().toString());
@@ -71,19 +72,20 @@ public class GripperSubsystem extends SubsystemBase {
         gripperSolenoid.set(Value.kReverse);
     }
 
-    public GamePiece getFoundGamePiece(){
+    public GamePiece getFoundGamePiece() {
         return foundGamePiece;
     }
 
     private GamePiece checkColors(int r, int g, int b) {
         if (r >= MIN_RED_CONE && r <= MAX_RED_CONE && g >= MIN_GREEN_CONE && g <= MAX_GREEN_CONE && b >= MIN_BLUE_CONE
-            && b <= MAX_BLUE_CONE)
-          return GamePiece.CONE;
-        else if (r >= MIN_RED_CUBE && r <= MAX_RED_CUBE && g >= MIN_GREEN_CUBE && g <= MAX_GREEN_CUBE && b >= MIN_BLUE_CUBE
-            && b <= MAX_BLUE_CUBE)
-          return GamePiece.CUBE;
+                && b <= MAX_BLUE_CONE)
+            return GamePiece.CONE;
+        else if (r >= MIN_RED_CUBE && r <= MAX_RED_CUBE && g >= MIN_GREEN_CUBE && g <= MAX_GREEN_CUBE
+                && b >= MIN_BLUE_CUBE
+                && b <= MAX_BLUE_CUBE)
+            return GamePiece.CUBE;
         else
-          return GamePiece.NONE;
-      }
+            return GamePiece.NONE;
+    }
 
 }
