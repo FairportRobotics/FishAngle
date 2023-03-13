@@ -4,7 +4,7 @@ import frc.robot.RobotContainer.GamePiece;
 
 public class Constants {
 
-    public static final Mode CURRENT_MODE = Mode.SIM;
+    public static final Mode CURRENT_MODE = Mode.REAL;
     public static enum Mode {
       /** Running on a real robot. */
       REAL,
@@ -23,7 +23,7 @@ public class Constants {
     public static final int ARM_FALCON_ID = 20;
     public static final int ARM_POT_ID = 1;
     public static final int ARM_MAX_POT_VALUE = 3690;
-    public static final int ARM_MIN_POT_VALUE = 0;
+    public static final int ARM_MIN_POT_VALUE = -0;
 
     public static final int WRIST_FALCON_ID = 50;
     public static final int WRIST_POT_ID = 0;
@@ -41,8 +41,8 @@ public class Constants {
 
     static {
 
-        ARM_HIGH_POS[GamePiece.CONE.valueOf()] = 2048;
-        ARM_HIGH_POS[GamePiece.CUBE.valueOf()] = 2048;
+        ARM_HIGH_POS[GamePiece.CONE.valueOf()] = 1160;
+        ARM_HIGH_POS[GamePiece.CUBE.valueOf()] = 1160;
 
         ARM_MID_POS[GamePiece.CONE.valueOf()] = 822;
         ARM_MID_POS[GamePiece.CUBE.valueOf()] = 822;
@@ -50,8 +50,8 @@ public class Constants {
         ARM_LOW_POS[GamePiece.CONE.valueOf()] = 30;
         ARM_LOW_POS[GamePiece.CUBE.valueOf()] = 30;
 
-        WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 2048;
-        WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 2048;
+        WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 1946;
+        WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 1946;
 
         WRIST_MID_POS[GamePiece.CONE.valueOf()] = 1946;
         WRIST_MID_POS[GamePiece.CUBE.valueOf()] = 1946;
@@ -61,7 +61,7 @@ public class Constants {
 
     }
 
-    public static final int ARM_HOME_POS_VAL = -50;
+    public static final int ARM_HOME_POS_VAL = 0;
     public static final int WRIST_HOME_POS_VAL = 375;
 
     public static final int ARM_BRAKE_SOLENOID = 4;
@@ -107,7 +107,7 @@ public class Constants {
 
     public static final int PH_CAN_ID = 18;
 
-    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 1 : 0;
+    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 0.0001 : 0;
     public static final double PP_PID_I = CURRENT_MODE == Mode.REAL ? 0 : 0;
     public static final double PP_PID_D = CURRENT_MODE == Mode.REAL ? 0 : 0;
 

@@ -9,7 +9,7 @@ import frc.robot.commands.SwerveDrivePathCommand;
 public class LeaveZoneAndChargeAutoCommand extends SequentialCommandGroup{
     public LeaveZoneAndChargeAutoCommand(){
         addCommands(
-            new SwerveDrivePathCommand(PathPlanner.loadPath("Move_Out_Zone_Charge", new PathConstraints(5.0, 3.0)))
+            new SwerveDrivePathCommand(PathPlanner.loadPath("Move_Out_Zone_Charge", new PathConstraints(2, 1)))
         );
     }
 }

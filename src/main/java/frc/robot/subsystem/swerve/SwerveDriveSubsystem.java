@@ -126,13 +126,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 kinematics, getCorrectedHeading(),
                 new SwerveModulePosition[] { frontLeftModule.getPosition(),
                         frontRightModule.getPosition(),
-                        backLeftModule.getPosition(), backRightModule.getPosition() });
+                        backLeftModule.getPosition(), backRightModule.getPosition() },
+                new Pose2d(0, 0, Rotation2d.fromDegrees(180)));
 
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, getCorrectedHeading(),
                 new SwerveModulePosition[] { frontLeftModule.getPosition(),
                         frontRightModule.getPosition(),
                         backLeftModule.getPosition(), backRightModule.getPosition() },
-                new Pose2d());
+                new Pose2d(0, 0, Rotation2d.fromDegrees(180)));
 
         simVelocityX = new SlewRateLimiter(10);
         simVelocityY = new SlewRateLimiter(10);
@@ -221,9 +222,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         Logger.getInstance().recordOutput("SwerveModuleStates", states);
         Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());
         Logger.getInstance().recordOutput("Pose Estimator", poseEstimator.getEstimatedPosition());
-        Logger.getInstance().recordOutput("Gyro Heading", gyroscope.getFusedHeading());
-        Logger.getInstance().recordOutput("Gyro Yaw", gyroscope.getYaw());
-        Logger.getInstance().recordOutput("Gyro Angle", gyroscope.getAngle());
+        Logger.getInstance().recordOutput("Gyro Heading", Math.toDegrees(gyroscope.getRotation2d().getRotations()));
     }
 
     @Override

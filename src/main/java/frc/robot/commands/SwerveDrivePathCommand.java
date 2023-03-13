@@ -28,7 +28,7 @@ public class SwerveDrivePathCommand extends PPSwerveControllerCommand {
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D),
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D), RobotContainer.swerveDriveSubsystem::drive, true,
                 RobotContainer.swerveDriveSubsystem);
-        this.traj = PathPlanner.loadPath(pathName, new PathConstraints(4.0, 3.0));
+        this.traj = PathPlanner.loadPath(pathName, new PathConstraints(1.0, 1.0));
     }
 
     /**

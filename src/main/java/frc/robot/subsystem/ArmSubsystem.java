@@ -29,12 +29,12 @@ public class ArmSubsystem extends SubsystemBase {
     TalonFX armFalcon;
     AnalogInput armPot;
     PIDController armPidController;
-    double currentArmSpeed = 0.0;
+    boolean armPidDone = true;
 
     TalonSRX wristFalcon;
     AnalogInput wristPot;
     PIDController wristPidController;
-    double currentWristSpeed = 0.0;
+    boolean wristPidDone = true;
 
     Mechanism2d armMechanism2d;
     MechanismLigament2d armLig;
@@ -52,7 +52,7 @@ public class ArmSubsystem extends SubsystemBase {
         armFalcon.setNeutralMode(NeutralMode.Brake);
         armPot = new AnalogInput(Constants.ARM_POT_ID);
         armPidController = new PIDController(0.010, 0.0001, 0.00001); // TODO: Tune
-        armPidController.setTolerance(50);
+        armPidController.setTolerance(10);
 
         wristFalcon = new TalonSRX(Constants.WRIST_FALCON_ID);
         wristFalcon.setInverted(true); // Flip this to true if it's driving the wrong way
@@ -74,16 +74,24 @@ public class ArmSubsystem extends SubsystemBase {
     public void periodic() {
 
         // TODO: Map Potentiometer angle to wrist and arm angles
-        //wristLig.setAngle(wristPot.getValue());
-        //armLig.setAngle(armPot.getValue());
+        // wristLig.setAngle(wristPot.getValue());
+        // armLig.setAngle(armPot.getValue());
+
+        double currentArmSpeed = 0.0;
+        double currentWristSpeed = 0.0;
 
         setArmPosition(getArmSetpoint() - (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) * 10));
 
-        currentArmSpeed = armPidController.calculate(armPot.getValue());
-        currentWristSpeed = wristPidController.calculate(wristPot.getValue());
+        if (!armPidDone)
+            currentArmSpeed = armPidController.calculate(armPot.getValue());
+        if (!wristPidDone)
+            //currentWristSpeed = wristPidController.calculate(wristPot.getValue());
+        if (MathUtil.applyDeadband(operatorController.getRightY(), 0.1) != 0.0) {
+            currentWristSpeed = operatorController.getRightY();
+        }
 
         currentArmSpeed = Math.max(-0.5, Math.min(currentArmSpeed, 0.5));
-        currentWristSpeed = Math.max(-0.75, Math.min(currentWristSpeed, 0.75));
+        currentWristSpeed = Math.max(-1, Math.min(currentWristSpeed, 1));
 
         if (armPot.getValue() >= Constants.ARM_MAX_POT_VALUE) {
             currentArmSpeed = Math.min(currentArmSpeed, 0);
@@ -97,32 +105,24 @@ public class ArmSubsystem extends SubsystemBase {
             currentWristSpeed = Math.max(currentWristSpeed, 0);
         }
 
-        if(armPidController.atSetpoint()){
-            brakeSolenoid.set(true);
+        if (armPidController.atSetpoint()) {
+            armPidDone = true;
             currentArmSpeed = 0.0;
-        }else{
-            brakeSolenoid.set(false);
         }
 
-
-        armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
-
-        if (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) == 0.0)
-        {
-            wristFalcon.set(ControlMode.PercentOutput, currentWristSpeed);
+        if(wristPidController.atSetpoint()){
+            wristPidDone = true;
         }
-        else  // manual override
-        {
-            currentWristSpeed = operatorController.getRightY()*0.75;
-            wristFalcon.set(ControlMode.PercentOutput, currentWristSpeed);
-        }
+
+        //armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
+        //wristFalcon.set(ControlMode.PercentOutput, currentWristSpeed);
 
         Logger.getInstance().recordOutput("Arm setpoint", armPidController.getSetpoint());
         Logger.getInstance().recordOutput("Arm Position", armPot.getValue());
         Logger.getInstance().recordOutput("Arm Speed", currentArmSpeed);
         Logger.getInstance().recordOutput("Arm at position", armPidController.atSetpoint());
 
-        //Logger.getInstance().recordOutput("Arm Brake State", brakeSolenoid.get());
+        // Logger.getInstance().recordOutput("Arm Brake State", brakeSolenoid.get());
 
         Logger.getInstance().recordOutput("Wrist setpoint", wristPidController.getSetpoint());
         Logger.getInstance().recordOutput("Wrist Position", wristPot.getValue());
@@ -135,6 +135,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void setArmPosition(double pos) {
         pos = Math.max(Constants.ARM_MIN_POT_VALUE, Math.min(pos, Constants.ARM_MAX_POT_VALUE));
         armPidController.setSetpoint(pos);
+        armPidDone = false;
     }
 
     public double getArmSetpoint() {
@@ -142,10 +143,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public void setWristPosition(double pos) {
-        
+
         pos = Math.max(Constants.WRIST_MIN_POT_VALUE, Math.min(pos, Constants.WRIST_MAX_POT_VALUE));
 
         wristPidController.setSetpoint(pos);
+        wristPidDone = false;
     }
 
     public double getWristSetpoint() {

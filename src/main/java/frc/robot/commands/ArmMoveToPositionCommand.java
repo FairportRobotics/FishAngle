@@ -51,7 +51,7 @@ public class ArmMoveToPositionCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return armSubsystem.isAtRequestedPosition();
+        return true;//armSubsystem.isAtRequestedPosition();
     }
 
     public enum ArmPosition {

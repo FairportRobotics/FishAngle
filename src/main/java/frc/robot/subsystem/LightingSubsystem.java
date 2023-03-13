@@ -46,6 +46,10 @@ public class LightingSubsystem extends SubsystemBase {
             this.lightingController.fillRainbow();
     }
 
+    public ArduinoLightingController getLightingController(){
+        return lightingController;
+    }
+
     public void off(){
         if (lightingController != null)
             this.lightingController.fillAll("000000000");
