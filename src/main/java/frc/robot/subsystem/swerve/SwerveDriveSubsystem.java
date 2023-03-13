@@ -40,10 +40,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             Math.hypot(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
                     Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
-    private final SwerveModule frontLeftModule;
-    private final SwerveModule frontRightModule;
-    private final SwerveModule backLeftModule;
-    private final SwerveModule backRightModule;
+    private final SwerveModule[] swerveModules = new SwerveModule[4];
 
     private final AHRS gyroscope = new AHRS();
 
@@ -78,7 +75,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             e.printStackTrace();
         }
 
-        frontLeftModule = new MkSwerveModuleBuilder()
+        swerveModules[0] = new MkSwerveModuleBuilder()
                 .withLayout(shuffleboardTab.getLayout("Front Left Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(0, 0))
@@ -89,7 +86,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 .withSteerOffset(Constants.SWERVE_OFFSETS[0])
                 .build();
 
-        frontRightModule = new MkSwerveModuleBuilder()
+        swerveModules[1] = new MkSwerveModuleBuilder()
                 .withLayout(shuffleboardTab.getLayout("Front Right Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(2, 0))
@@ -100,7 +97,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 .withSteerOffset(Constants.SWERVE_OFFSETS[1])
                 .build();
 
-        backLeftModule = new MkSwerveModuleBuilder()
+        swerveModules[2] = new MkSwerveModuleBuilder()
                 .withLayout(shuffleboardTab.getLayout("Back Left Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(4, 0))
@@ -111,7 +108,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 .withSteerOffset(Constants.SWERVE_OFFSETS[2])
                 .build();
 
-        backRightModule = new MkSwerveModuleBuilder()
+        swerveModules[3] = new MkSwerveModuleBuilder()
                 .withLayout(shuffleboardTab.getLayout("Back Right Module", BuiltInLayouts.kList)
                         .withSize(2, 4)
                         .withPosition(6, 0))
@@ -123,16 +120,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 .build();
 
         odometry = new SwerveDriveOdometry(
-                kinematics, getCorrectedHeading(),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(),
-                        frontRightModule.getPosition(),
-                        backLeftModule.getPosition(), backRightModule.getPosition() },
+                kinematics, getHeading(),
+                getModulePositions(),
                 new Pose2d(0, 0, Rotation2d.fromDegrees(180)));
 
-        poseEstimator = new SwerveDrivePoseEstimator(kinematics, getCorrectedHeading(),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(),
-                        frontRightModule.getPosition(),
-                        backLeftModule.getPosition(), backRightModule.getPosition() },
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, getHeading(),
+                getModulePositions(),
                 new Pose2d(0, 0, Rotation2d.fromDegrees(180)));
 
         simVelocityX = new SlewRateLimiter(10);
@@ -140,29 +133,21 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public void zeroGyroscope() {
-        odometry.resetPosition(getCorrectedHeading(),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(),
-                        frontRightModule.getPosition(),
-                        backLeftModule.getPosition(), backRightModule.getPosition() },
+        odometry.resetPosition(getHeading(),
+                getModulePositions(),
                 new Pose2d(odometry.getPoseMeters().getTranslation(), Rotation2d.fromDegrees(0.0)));
 
-        poseEstimator.resetPosition(getCorrectedHeading(),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(),
-                        frontRightModule.getPosition(),
-                        backLeftModule.getPosition(), backRightModule.getPosition() },
+        poseEstimator.resetPosition(getHeading(),
+                getModulePositions(),
                 new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), Rotation2d.fromDegrees(0.0)));
     }
 
     public void resetOdometry(Pose2d newPose2d) {
-        odometry.resetPosition(getCorrectedHeading(),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(),
-                        frontRightModule.getPosition(),
-                        backLeftModule.getPosition(), backRightModule.getPosition() },
+        odometry.resetPosition(getHeading(),
+                getModulePositions(),
                 newPose2d);
-        poseEstimator.resetPosition(getCorrectedHeading(),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(),
-                        frontRightModule.getPosition(),
-                        backLeftModule.getPosition(), backRightModule.getPosition() },
+        poseEstimator.resetPosition(getHeading(),
+                getModulePositions(),
                 newPose2d);
     }
 
@@ -171,33 +156,37 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public void drive(ChassisSpeeds chassisSpeeds) {
-        this.chassisSpeeds = chassisSpeeds;
+        SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
+        for (int i = 0; i < 4; i++) {
+            SwerveModuleState.optimize(states[i], Rotation2d.fromRadians(swerveModules[i].getSteerAngle()));
+            swerveModules[i].set(states[i].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+                    states[i].angle.getRadians());
+        }
+        Logger.getInstance().recordOutput("SwerveModuleStates", states);
     }
 
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
-    public Rotation2d getCorrectedHeading() {
+    public Rotation2d getHeading() {
         return gyroscope.getRotation2d();
     }
 
-    public void lockWheels() {
-
+    public SwerveModulePosition[] getModulePositions() {
+        return new SwerveModulePosition[] { swerveModules[0].getPosition(),
+                swerveModules[1].getPosition(),
+                swerveModules[2].getPosition(), swerveModules[3].getPosition() };
     }
 
     @Override
     public void periodic() {
         odometry.update(
-                getCorrectedHeading(),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(),
-                        frontRightModule.getPosition(),
-                        backLeftModule.getPosition(), backRightModule.getPosition() });
+                getHeading(),
+                getModulePositions());
 
-        poseEstimator.update(getCorrectedHeading(),
-                new SwerveModulePosition[] { frontLeftModule.getPosition(),
-                        frontRightModule.getPosition(),
-                        backLeftModule.getPosition(), backRightModule.getPosition() });
+        poseEstimator.update(getHeading(),
+                getModulePositions());
 
         Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
 
@@ -207,19 +196,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                     cameraPose.get().estimatedPose);
         }
 
-        SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
-
-        frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-                states[0].angle.getRadians());
-        frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-                states[1].angle.getRadians());
-        backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-                states[2].angle.getRadians());
-        backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-                states[3].angle.getRadians());
-
         // Logging
-        Logger.getInstance().recordOutput("SwerveModuleStates", states);
         Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());
         Logger.getInstance().recordOutput("Pose Estimator", poseEstimator.getEstimatedPosition());
         Logger.getInstance().recordOutput("Gyro Heading", Math.toDegrees(gyroscope.getRotation2d().getRotations()));
