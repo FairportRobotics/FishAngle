@@ -79,7 +79,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void periodic() {
 
         double currentArmSpeed = 0.0;
-        double currentWristSpeed = -2.0;
+        double currentWristSpeed = 0.0;
 
         setArmPosition(getArmSetpoint() - (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) * 10));
 
@@ -112,7 +112,9 @@ public class ArmSubsystem extends SubsystemBase {
             }
 
             wristFalcon.set(ControlMode.PercentOutput, currentWristSpeed);
-
+            wristSetpoint = wristFalcon.getSelectedSensorPosition(); // Set the setpoint to where we currently are. This
+                                                                     // way when the operator stops manual control it
+                                                                     // holds where it currently is
         } else { // Setpoint
             wristFalcon.set(ControlMode.Position, wristSetpoint);
         }
@@ -127,7 +129,8 @@ public class ArmSubsystem extends SubsystemBase {
         Logger.getInstance().recordOutput("Wrist setpoint", wristSetpoint);
         Logger.getInstance().recordOutput("Wrist Position", wristFalcon.getSelectedSensorPosition());
         Logger.getInstance().recordOutput("Wrist Speed", currentWristSpeed);
-        Logger.getInstance().recordOutput("Wrist at position", wristFalcon.getClosedLoopError() <= WRIST_SETPOINT_TOLERANCE);
+        Logger.getInstance().recordOutput("Wrist at position",
+                wristFalcon.getClosedLoopError() <= WRIST_SETPOINT_TOLERANCE);
 
         Logger.getInstance().recordOutput("Arm Mechanism", armMechanism2d);
     }
