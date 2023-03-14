@@ -60,7 +60,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveDriveOdometry odometry;
     private final SwerveDrivePoseEstimator poseEstimator;
 
-    //private RobotFieldPosition fieldPositionEstimator;
+    private RobotFieldPosition fieldPositionEstimator;
     private final WPI_AprilTagPoseEstimator fieldPoseEstimator;
 
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
@@ -71,13 +71,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public SwerveDriveSubsystem() {
 
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
-        // try {
-        //     this.fieldPositionEstimator = new RobotFieldPosition("cameraName", new Transform3d(),
-        //             AprilTagFields.k2023ChargedUp,
-        //             PoseStrategy.CLOSEST_TO_LAST_POSE);
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        // }
+        try {
+            this.fieldPositionEstimator = new RobotFieldPosition("cameraName", new Transform3d(),
+                    AprilTagFields.k2023ChargedUp,
+                    PoseStrategy.CLOSEST_TO_LAST_POSE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         swerveModules[0] = new MkSwerveModuleBuilder()
                 .withLayout(shuffleboardTab.getLayout("Front Left Module", BuiltInLayouts.kList)
@@ -136,7 +136,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         System.out.println(cam.getInfo().name);
 
         fieldPoseEstimator = new WPI_AprilTagPoseEstimator(cam);
-        fieldPoseEstimator.runDetectorPipeline();
+        //fieldPoseEstimator.runDetectorPipeline();
 
         simVelocityX = new SlewRateLimiter(10);
         simVelocityY = new SlewRateLimiter(10);
@@ -198,13 +198,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         poseEstimator.update(getHeading(),
                 getModulePositions());
 
-        // //Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
+        Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
 
-        // if (cameraPose.isPresent()) {
-        //     poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(), Timer.getFPGATimestamp());
-        //     Logger.getInstance().recordOutput("PhotonVision Field Position",
-        //             cameraPose.get().estimatedPose);
-        // }
+        if (cameraPose.isPresent()) {
+            poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(), Timer.getFPGATimestamp());
+            Logger.getInstance().recordOutput("PhotonVision Field Position",
+                    cameraPose.get().estimatedPose);
+        }
 
         Logger.getInstance().recordOutput("AprilTagPose", fieldPoseEstimator.getEstimatedGlobalPose());
 

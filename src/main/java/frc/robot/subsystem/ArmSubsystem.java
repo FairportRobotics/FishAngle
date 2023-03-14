@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -60,6 +61,7 @@ public class ArmSubsystem extends SubsystemBase {
         wristConfig.slot0.kP = 1.0;
         wristConfig.slot0.kI = 0.0;
         wristConfig.slot0.kD = 0.2;
+        wristConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
         wristFalcon.configAllSettings(wristConfig);
         wristFalcon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
         wristFalcon.setInverted(true); // Flip this to true if it's driving the wrong way
@@ -81,25 +83,38 @@ public class ArmSubsystem extends SubsystemBase {
         double currentArmSpeed = 0.0;
         double currentWristSpeed = 0.0;
 
-        setArmPosition(getArmSetpoint() - (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) * 10));
+        if (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) != 0.0) { // Manual control
+            currentArmSpeed = operatorController.getLeftY();
 
-        if (!armPidDone)
-            currentArmSpeed = armPidController.calculate(armPot.getValue());
+            currentArmSpeed = Math.max(-0.5, Math.min(currentArmSpeed, 0.5));
 
-        currentArmSpeed = Math.max(-0.5, Math.min(currentArmSpeed, 0.5));
+            if (armPot.getValue() >= Constants.ARM_MAX_ROM_VALUE) {
+                currentArmSpeed = Math.min(currentArmSpeed, 0);
+            } else if (armPot.getValue() <= Constants.ARM_MIN_ROM_VALUE) {
+                currentArmSpeed = Math.max(currentArmSpeed, 0);
+            }
 
-        if (armPot.getValue() >= Constants.ARM_MAX_ROM_VALUE) {
-            currentArmSpeed = Math.min(currentArmSpeed, 0);
-        } else if (armPot.getValue() <= Constants.ARM_MIN_ROM_VALUE) {
-            currentArmSpeed = Math.max(currentArmSpeed, 0);
+            armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
+            armPidController.setSetpoint(armPot.getValue());
+        } else { // Setpoint
+            if (!armPidDone)
+                currentArmSpeed = armPidController.calculate(armPot.getValue());
+
+            currentArmSpeed = Math.max(-0.5, Math.min(currentArmSpeed, 0.5));
+
+            if (armPot.getValue() >= Constants.ARM_MAX_ROM_VALUE) {
+                currentArmSpeed = Math.min(currentArmSpeed, 0);
+            } else if (armPot.getValue() <= Constants.ARM_MIN_ROM_VALUE) {
+                currentArmSpeed = Math.max(currentArmSpeed, 0);
+            }
+
+            if (armPidController.atSetpoint()) {
+                armPidDone = true;
+                currentArmSpeed = 0.0;
+            }
+
+            armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
         }
-
-        if (armPidController.atSetpoint()) {
-            armPidDone = true;
-            currentArmSpeed = 0.0;
-        }
-
-        armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
 
         if (MathUtil.applyDeadband(operatorController.getRightY(), 0.1) != 0.0) { // Manual control
             currentWristSpeed = operatorController.getRightY();
