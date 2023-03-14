@@ -4,7 +4,7 @@ import frc.robot.RobotContainer.GamePiece;
 
 public class Constants {
 
-    public static final Mode CURRENT_MODE = Mode.REAL;
+    public static final Mode CURRENT_MODE = Mode.SIM;
     public static enum Mode {
       /** Running on a real robot. */
       REAL,
@@ -22,13 +22,13 @@ public class Constants {
 
     public static final int ARM_FALCON_ID = 20;
     public static final int ARM_POT_ID = 1;
-    public static final int ARM_MAX_POT_VALUE = 3690;
-    public static final int ARM_MIN_POT_VALUE = -0;
+    public static final int ARM_MAX_ROM_VALUE = 3690;
+    public static final int ARM_MIN_ROM_VALUE = -0;
 
     public static final int WRIST_FALCON_ID = 50;
     public static final int WRIST_POT_ID = 0;
-    public static final int WRIST_MAX_POT_VALUE = 4096;
-    public static final int WRIST_MIN_POT_VALUE = 274;
+    public static final int WRIST_MAX_ROM_VALUE = 4096;
+    public static final int WRIST_MIN_ROM_VALUE = 274;
 
 
     public static final int[] ARM_HIGH_POS = new int[2];
