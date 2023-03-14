@@ -8,6 +8,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import com.fairportrobotics.frc.poe.CameraTracking.RobotFieldPosition;
+import com.fairportrobotics.frc.poe.CameraTracking.WPILIB.WPI_AprilTagPoseEstimator;
 import com.kauailabs.navx.frc.AHRS;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
@@ -15,6 +16,8 @@ import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -57,7 +60,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveDriveOdometry odometry;
     private final SwerveDrivePoseEstimator poseEstimator;
 
-    private RobotFieldPosition fieldPositionEstimator;
+    //private RobotFieldPosition fieldPositionEstimator;
+    private final WPI_AprilTagPoseEstimator fieldPoseEstimator;
 
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
@@ -67,13 +71,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public SwerveDriveSubsystem() {
 
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
-        try {
-            this.fieldPositionEstimator = new RobotFieldPosition("cameraName", new Transform3d(),
-                    AprilTagFields.k2023ChargedUp,
-                    PoseStrategy.CLOSEST_TO_LAST_POSE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // try {
+        //     this.fieldPositionEstimator = new RobotFieldPosition("cameraName", new Transform3d(),
+        //             AprilTagFields.k2023ChargedUp,
+        //             PoseStrategy.CLOSEST_TO_LAST_POSE);
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
 
         swerveModules[0] = new MkSwerveModuleBuilder()
                 .withLayout(shuffleboardTab.getLayout("Front Left Module", BuiltInLayouts.kList)
@@ -127,6 +131,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, getHeading(),
                 getModulePositions(),
                 new Pose2d(0, 0, Rotation2d.fromDegrees(180)));
+
+        UsbCamera cam = CameraServer.startAutomaticCapture();
+        System.out.println(cam.getInfo().name);
+
+        fieldPoseEstimator = new WPI_AprilTagPoseEstimator(cam);
+        fieldPoseEstimator.runDetectorPipeline();
 
         simVelocityX = new SlewRateLimiter(10);
         simVelocityY = new SlewRateLimiter(10);
@@ -188,13 +198,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         poseEstimator.update(getHeading(),
                 getModulePositions());
 
-        Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
+        // //Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
 
-        if (cameraPose.isPresent()) {
-            poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(), Timer.getFPGATimestamp());
-            Logger.getInstance().recordOutput("PhotonVision Field Position",
-                    cameraPose.get().estimatedPose);
-        }
+        // if (cameraPose.isPresent()) {
+        //     poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(), Timer.getFPGATimestamp());
+        //     Logger.getInstance().recordOutput("PhotonVision Field Position",
+        //             cameraPose.get().estimatedPose);
+        // }
+
+        Logger.getInstance().recordOutput("AprilTagPose", fieldPoseEstimator.getEstimatedGlobalPose());
 
         // Logging
         Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());
