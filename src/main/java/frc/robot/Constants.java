@@ -107,7 +107,7 @@ public class Constants {
 
     public static final int PH_CAN_ID = 18;
 
-    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 0.0001 : 0;
+    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 0 : 0;
     public static final double PP_PID_I = CURRENT_MODE == Mode.REAL ? 0 : 0;
     public static final double PP_PID_D = CURRENT_MODE == Mode.REAL ? 0 : 0;
 
