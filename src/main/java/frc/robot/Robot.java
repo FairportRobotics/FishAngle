@@ -25,6 +25,7 @@ import frc.robot.commands.autonomus.LeaveZoneAutoCommand;
 import frc.robot.commands.autonomus.OneConeAutoCommand;
 import frc.robot.commands.autonomus.OneCubeAutoCommand;
 import frc.robot.commands.autonomus.TwoCubeAutoCommand;
+import frc.robot.commands.autonomus.TwoCubeChargeAutoCommand;
 
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
@@ -71,12 +72,13 @@ public class Robot extends LoggedRobot {
 
         m_robotContainer = new RobotContainer();
 
-        autoChooser.addOption("None", Commands.print("No auto command selected"));
+        autoChooser.setDefaultOption("None", Commands.print("No auto command selected"));
         autoChooser.addOption("Leave Zone", new LeaveZoneAutoCommand());
         autoChooser.addOption("Leave Zone and Charge", new LeaveZoneAndChargeAutoCommand());
         autoChooser.addOption("One Cone", new OneConeAutoCommand());
         autoChooser.addOption("One Cube", new OneCubeAutoCommand());
-        autoChooser.setDefaultOption("Two Cube", new TwoCubeAutoCommand());
+        autoChooser.addOption("Two Cube", new TwoCubeAutoCommand());
+        autoChooser.addOption("Two Cube and Charge", new TwoCubeChargeAutoCommand());
 
         Robot.MAIN_TAB.add(autoChooser);
 

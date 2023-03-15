@@ -12,7 +12,7 @@ public class OneCubeAutoCommand extends SequentialCommandGroup {
     public OneCubeAutoCommand() {
         addCommands(
             new ParallelDeadlineGroup(
-                    new SwerveDrivePathCommand("One_Cube_Place"),
+                    new SwerveDrivePathCommand("One_Cube_Place", true),
                     new ArmMoveToPositionCommand(ArmPosition.kHome),
                     new GripperCommand(GripperAction.kClose)),
             new ArmMoveToPositionCommand(ArmPosition.kMid),

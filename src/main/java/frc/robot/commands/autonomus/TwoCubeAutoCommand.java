@@ -15,7 +15,7 @@ public class TwoCubeAutoCommand extends SequentialCommandGroup{
     public TwoCubeAutoCommand(){
         addCommands(
             new ParallelDeadlineGroup(
-                new SwerveDrivePathCommand("Two_Cube_Place_1"),
+                new SwerveDrivePathCommand("Two_Cube_Place_1", true),
                 new ArmMoveToPositionCommand(ArmPosition.kHome),
                 new GripperCommand(GripperAction.kClose)
             ),
@@ -23,7 +23,7 @@ public class TwoCubeAutoCommand extends SequentialCommandGroup{
             new GripperCommand(GripperAction.kOpen),
             new WaitCommand(0.5),
             new ParallelDeadlineGroup(
-                new SwerveDrivePathCommand("Two_Cube_Place_2"),
+                new SwerveDrivePathCommand("Two_Cube_Place_2", false),
                 new ArmMoveToPositionCommand(ArmPosition.kHome),
                 new GripperCommand(GripperAction.kClose)
             ),
@@ -34,14 +34,14 @@ public class TwoCubeAutoCommand extends SequentialCommandGroup{
             new WaitCommand(0.1),
             new GripperCommand(GripperAction.kClose),
             new ParallelDeadlineGroup(
-                new SwerveDrivePathCommand("Two_Cube_Place_3"),
+                new SwerveDrivePathCommand("Two_Cube_Place_3", false),
                 new ArmMoveToPositionCommand(ArmPosition.kHome)
             ),
             new ArmMoveToPositionCommand(ArmPosition.kMid),
             new GripperCommand(GripperAction.kOpen),
             new WaitCommand(0.5),
             new ParallelDeadlineGroup(
-                new SwerveDrivePathCommand("Two_Cube_Place_4"),
+                new SwerveDrivePathCommand("Two_Cube_Place_4", false),
                 new ArmMoveToPositionCommand(ArmPosition.kHome),
                 new GripperCommand(GripperAction.kClose)
             )

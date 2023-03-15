@@ -128,11 +128,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 odometry = new SwerveDriveOdometry(
                                 kinematics, getHeading(),
                                 getModulePositions(),
-                                new Pose2d(0, 0, Rotation2d.fromDegrees(180)));
+                                new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
 
                 poseEstimator = new SwerveDrivePoseEstimator(kinematics, getHeading(),
                                 getModulePositions(),
-                                new Pose2d(0, 0, Rotation2d.fromDegrees(180)));
+                                new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
 
                 UsbCamera cam = CameraServer.startAutomaticCapture();
                 System.out.println(cam.getInfo().name);
@@ -165,7 +165,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         }
 
         public Rotation2d getRotation() {
-                return odometry.getPoseMeters().getRotation();
+                return poseEstimator.getEstimatedPosition().getRotation();
         }
 
         public void drive(ChassisSpeeds chassisSpeeds) {

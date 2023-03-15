@@ -14,6 +14,7 @@ public class SwerveDrivePathCommand extends PPSwerveControllerCommand {
 
     PathPlannerTrajectory traj = new PathPlannerTrajectory();
     SwerveDriveSubsystem swerveDriveSubsystem;
+    private boolean isFirstPath = true;
 
     /**
      * 
@@ -22,13 +23,14 @@ public class SwerveDrivePathCommand extends PPSwerveControllerCommand {
      * 
      * @param pathName the name of the path
      */
-    public SwerveDrivePathCommand(String pathName) {
+    public SwerveDrivePathCommand(String pathName, boolean isFirstPath) {
         super(PathPlanner.loadPath(pathName, new PathConstraints(1.0, 1.0)),
                 RobotContainer.swerveDriveSubsystem::getPose, new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D),
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D),
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D), RobotContainer.swerveDriveSubsystem::drive, true,
                 RobotContainer.swerveDriveSubsystem);
         this.traj = PathPlanner.loadPath(pathName, new PathConstraints(1.0, 1.0));
+        this.isFirstPath = isFirstPath;
     }
 
     /**
@@ -38,13 +40,14 @@ public class SwerveDrivePathCommand extends PPSwerveControllerCommand {
      * 
      * @param pathName the name of the path
      */
-    public SwerveDrivePathCommand(PathPlannerTrajectory traj) {
+    public SwerveDrivePathCommand(PathPlannerTrajectory traj, boolean isFirstPath) {
         super(traj,
                 RobotContainer.swerveDriveSubsystem::getPose, new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D),
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D),
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D), RobotContainer.swerveDriveSubsystem::drive, true,
                 RobotContainer.swerveDriveSubsystem);
         this.traj = traj;
+        this.isFirstPath = isFirstPath;
     }
 
     /**
@@ -53,19 +56,21 @@ public class SwerveDrivePathCommand extends PPSwerveControllerCommand {
      * @param pathName        the name of the path
      * @param pathConstraints maxVelocity and maxAcceleration
      */
-    public SwerveDrivePathCommand(String pathName, PathConstraints pathConstraints) {
+    public SwerveDrivePathCommand(String pathName, PathConstraints pathConstraints, boolean isFirstPath) {
         super(PathPlanner.loadPath(pathName, pathConstraints),
                 RobotContainer.swerveDriveSubsystem::getPose, new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D),
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D),
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D), RobotContainer.swerveDriveSubsystem::drive, true,
                 RobotContainer.swerveDriveSubsystem);
         this.traj = PathPlanner.loadPath(pathName, pathConstraints);
+        this.isFirstPath = isFirstPath;
     }
 
     @Override
     public void initialize() {
         super.initialize();
-        RobotContainer.swerveDriveSubsystem.resetOdometry(traj.getInitialHolonomicPose());
+        if(isFirstPath)
+            RobotContainer.swerveDriveSubsystem.resetOdometry(traj.getInitialHolonomicPose());
     }
 
 }

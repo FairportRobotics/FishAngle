@@ -6,7 +6,7 @@ import frc.robot.commands.SwerveDrivePathCommand;
 public class LeaveZoneAutoCommand extends SequentialCommandGroup{
     public LeaveZoneAutoCommand(){
         addCommands(
-            new SwerveDrivePathCommand("Move_Out_Zone")
+            new SwerveDrivePathCommand("Move_Out_Zone", true)
         );
     }
 }

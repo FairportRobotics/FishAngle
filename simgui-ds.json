@@ -1,4 +1,9 @@
 {
+  "Keyboard 0 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
   "Keyboard 1 Settings": {
     "window": {
       "visible": true
@@ -18,12 +23,13 @@
         {
           "keyRate": 0.009999999776482582
         },
+        {},
         {
           "decKey": 81,
           "incKey": 69
         }
       ],
-      "axisCount": 4,
+      "axisCount": 6,
       "buttonCount": 4,
       "buttonKeys": [
         90,
