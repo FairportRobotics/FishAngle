@@ -1,6 +1,7 @@
 package frc.robot.subsystem.swerve;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
@@ -8,13 +9,17 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import com.fairportrobotics.frc.poe.CameraTracking.AprilTags;
 import com.fairportrobotics.frc.poe.CameraTracking.RobotFieldPosition;
 import com.kauailabs.navx.frc.AHRS;
+import com.swervedrivespecialties.swervelib.MechanicalConfiguration;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
@@ -32,10 +37,12 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
@@ -73,7 +80,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         private SlewRateLimiter simVelocityX;
         private SlewRateLimiter simVelocityY;
 
-        public SwerveDriveSubsystem() {
+        private AprilTags aprilTags;
+
+        private CommandXboxController controller;
+
+        private static final MechanicalConfiguration MK4I_L1 = new MechanicalConfiguration(
+                0.10033,
+                (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0),
+                false,
+                (14.0 / 50.0) * (10.0 / 60.0),
+                false
+        );
+
+        public SwerveDriveSubsystem(CommandXboxController controller) {
+                this.controller = controller;
 
                 ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
                 try {
@@ -88,7 +108,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                                 .withLayout(shuffleboardTab.getLayout("Front Left Module", BuiltInLayouts.kList)
                                                 .withSize(2, 4)
                                                 .withPosition(0, 0))
-                                .withGearRatio(SdsModuleConfigurations.MK4I_L1)
+                                .withGearRatio(MK4I_L1)
                                 .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[0])
                                 .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[0])
                                 .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[0])
@@ -99,7 +119,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                                 .withLayout(shuffleboardTab.getLayout("Front Right Module", BuiltInLayouts.kList)
                                                 .withSize(2, 4)
                                                 .withPosition(2, 0))
-                                .withGearRatio(SdsModuleConfigurations.MK4I_L1)
+                                .withGearRatio(MK4I_L1)
                                 .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[1])
                                 .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[1])
                                 .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[1])
@@ -110,7 +130,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                                 .withLayout(shuffleboardTab.getLayout("Back Left Module", BuiltInLayouts.kList)
                                                 .withSize(2, 4)
                                                 .withPosition(4, 0))
-                                .withGearRatio(SdsModuleConfigurations.MK4I_L1)
+                                .withGearRatio(MK4I_L1)
                                 .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[2])
                                 .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[2])
                                 .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[2])
@@ -121,7 +141,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                                 .withLayout(shuffleboardTab.getLayout("Back Right Module", BuiltInLayouts.kList)
                                                 .withSize(2, 4)
                                                 .withPosition(6, 0))
-                                .withGearRatio(SdsModuleConfigurations.MK4I_L1)
+                                .withGearRatio(MK4I_L1)
                                 .withDriveMotor(MotorType.FALCON, Constants.SWERVE_DRIVE_IDS[3])
                                 .withSteerMotor(MotorType.FALCON, Constants.SWERVE_STEER_IDS[3])
                                 .withSteerEncoderPort(Constants.SWERVE_ENCODER_IDS[3])
@@ -139,6 +159,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
                 UsbCamera cam = CameraServer.startAutomaticCapture();
                 System.out.println(cam.getInfo().name);
+
+                aprilTags = new AprilTags("front-facing");
 
                 //fieldPoseEstimator = new WPI_AprilTagPoseEstimator(cam);
                 // fieldPoseEstimator.runDetectorPipeline();
@@ -227,6 +249,39 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                                 }
                         }
                 }
+
+
+                // Within distance to collect the thing (Will not work if cam cannot see april tag)
+                aprilTags.freeze();
+                if(aprilTags.hasTargets() && (aprilTags.getClosestTarget().getFiducialId() == 5 || aprilTags.getClosestTarget().getFiducialId() == 4)) {
+                        Transform3d robotToCam = aprilTags.getClosestTarget().getBestCameraToTarget().plus(CAM_TO_ROBOT.inverse());
+                        if(robotToCam.getX() < 1.016 && Math.abs(robotToCam.getY()) < 1.31445) {
+                                Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
+                                controller.getHID().setRumble(RumbleType.kBothRumble, 0.5);
+                                
+                        } else {
+                                Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
+                                controller.getHID().setRumble(RumbleType.kBothRumble, 0);
+                        }
+                } else {
+                        try {
+                                AprilTagFieldLayout aprilTagList = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+
+                                Logger.getInstance().recordOutput("Number 5 Pose", aprilTagList.getTagPose(5).get());
+                                Logger.getInstance().recordOutput("Number 4 Pose", aprilTagList.getTagPose(4).get());
+
+                        } catch(Exception e) {
+                                e.printStackTrace();
+                        }
+                        Transform3d aprilTagFourPos = new Transform3d(new Translation3d(16.178784, 6.749796, 6.749796), new Rotation3d());
+                        Transform3d aprilTagFivePos = new Transform3d(new Translation3d(0.36195, 6.749796, 0.695452), new Rotation3d());
+
+                        Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
+                        controller.getHID().setRumble(RumbleType.kBothRumble, 0);
+
+                        
+                }
+                aprilTags.unFreeze();
 
                 // Logging
                 Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());

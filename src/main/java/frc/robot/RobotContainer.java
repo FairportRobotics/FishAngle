@@ -30,7 +30,7 @@ public class RobotContainer {
 
     public static final ArmSubsystem armSubsystem = new ArmSubsystem(operatorController);
     public static final GripperSubsystem gripperSubsystem = new GripperSubsystem(operatorController);
-    public static final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
+    public static final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem(driverController);
     public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
 
     private SwerveDriveCommand swerveDriveCommand;

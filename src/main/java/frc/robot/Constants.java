@@ -4,7 +4,7 @@ import frc.robot.RobotContainer.GamePiece;
 
 public class Constants {
 
-    public static final Mode CURRENT_MODE = Mode.SIM;
+    public static final Mode CURRENT_MODE = Mode.REAL;
     public static enum Mode {
       /** Running on a real robot. */
       REAL,
@@ -22,7 +22,7 @@ public class Constants {
 
     public static final int ARM_FALCON_ID = 20;
     public static final int ARM_POT_ID = 1;
-    public static final int ARM_MAX_ROM_VALUE = 3690;
+    public static final int ARM_MAX_ROM_VALUE = 300000;
     public static final int ARM_MIN_ROM_VALUE = -0;
 
     public static final int WRIST_FALCON_ID = 50;
@@ -43,17 +43,17 @@ public class Constants {
 
     static {
 
-        ARM_HIGH_POS[GamePiece.CONE.valueOf()] = 1160;
-        ARM_HIGH_POS[GamePiece.CUBE.valueOf()] = 1160;
+        ARM_HIGH_POS[GamePiece.CONE.valueOf()] = 225349;
+        ARM_HIGH_POS[GamePiece.CUBE.valueOf()] = 225349;
 
-        ARM_MID_POS[GamePiece.CONE.valueOf()] = 822;
-        ARM_MID_POS[GamePiece.CUBE.valueOf()] = 822;
+        ARM_MID_POS[GamePiece.CONE.valueOf()] = 171579;
+        ARM_MID_POS[GamePiece.CUBE.valueOf()] = 171579;
 
-        ARM_LOW_POS[GamePiece.CONE.valueOf()] = 30;
-        ARM_LOW_POS[GamePiece.CUBE.valueOf()] = 30;
+        ARM_LOW_POS[GamePiece.CONE.valueOf()] = 30000;
+        ARM_LOW_POS[GamePiece.CUBE.valueOf()] = 30000;
 
-        ARM_HOME_POS[GamePiece.CONE.valueOf()] = 5;
-        ARM_HOME_POS[GamePiece.CUBE.valueOf()] = 5;
+        ARM_HOME_POS[GamePiece.CONE.valueOf()] = 30000;
+        ARM_HOME_POS[GamePiece.CUBE.valueOf()] = 30000;
 
         WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 59710;
         WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 59710;

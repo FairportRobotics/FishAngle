@@ -56,9 +56,9 @@ public class ArmSubsystem extends SubsystemBase {
         armConfig.slot0.kI = 0.0;
         armConfig.slot0.kD = 0.2;
         armConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
-        armConfig.peakOutputForward = 1.0;
-        armConfig.peakOutputReverse = -1.0;
-        //armFalcon.configAllSettings(armConfig);
+        armConfig.peakOutputForward = 0.75;
+        armConfig.peakOutputReverse = -0.75;
+        armFalcon.configAllSettings(armConfig);
         armFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
         armFalcon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
         armFalcon.setNeutralMode(NeutralMode.Brake);
@@ -111,28 +111,12 @@ public class ArmSubsystem extends SubsystemBase {
 
             armSetpoint = armFalcon.getSelectedSensorPosition();
         } else { // Setpoint
-            if (!armPidDone)
-                currentArmSpeed = armPidController.calculate(armPot.getValue());
-
-            currentArmSpeed = Math.max(-0.5, Math.min(currentArmSpeed, 0.5));
-
-            if (armPot.getValue() >= Constants.ARM_MAX_ROM_VALUE) {
-                currentArmSpeed = Math.min(currentArmSpeed, 0);
-            } else if (armPot.getValue() <= Constants.ARM_MIN_ROM_VALUE) {
-                currentArmSpeed = Math.max(currentArmSpeed, 0);
-            }
-
-            if (armPidController.atSetpoint()) {
-                armPidDone = true;
-                currentArmSpeed = 0.0;
-            }
-
-            armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
+            armFalcon.set(ControlMode.Position, armSetpoint);
         }
 
         if (MathUtil.applyDeadband(operatorController.getRightY(), 0.1) != 0.0) { // Manual control
             currentWristSpeed = operatorController.getRightY();
-            currentWristSpeed = Math.max(-0.5, Math.min(currentWristSpeed, 0.5));
+            currentWristSpeed = Math.max(-0.30, Math.min(currentWristSpeed, 0.30));
 
             if (wristFalcon.getSelectedSensorPosition() >= Constants.WRIST_MAX_ROM_VALUE) {
                 currentWristSpeed = Math.min(currentWristSpeed, 0);
@@ -169,8 +153,6 @@ public class ArmSubsystem extends SubsystemBase {
 
     public void setArmPosition(double pos) {
         pos = Math.max(Constants.ARM_MIN_ROM_VALUE, Math.min(pos, Constants.ARM_MAX_ROM_VALUE));
-        armPidController.setSetpoint(pos);
-        armPidDone = false;
 
         armSetpoint = pos;
     }
