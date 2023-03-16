@@ -25,9 +25,13 @@ public class ArmMoveToPositionCommand extends CommandBase {
         double wristPos = 0.0;
 
         switch (position) {
+            case kFolded:
+                armPos = Constants.ARM_FOLDED_POS_VAL;
+                wristPos = Constants.WRIST_FOLDED_POS_VAL;
+                break;
             case kHome:
-                armPos = Constants.ARM_HOME_POS_VAL;
-                wristPos = Constants.WRIST_HOME_POS_VAL;
+                armPos = Constants.ARM_HOME_POS[requestedGamePiece.valueOf()];
+                wristPos = Constants.WRIST_HOME_POS[requestedGamePiece.valueOf()];
                 break;
             case kLow:
                 armPos = Constants.ARM_LOW_POS[requestedGamePiece.valueOf()];
@@ -55,6 +59,7 @@ public class ArmMoveToPositionCommand extends CommandBase {
     }
 
     public enum ArmPosition {
+        kFolded,
         kHome,
         kLow,
         kMid,

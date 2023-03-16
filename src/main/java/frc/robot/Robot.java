@@ -129,22 +129,13 @@ public class Robot extends LoggedRobot {
         }
         //RobotContainer.swerveDriveSubsystem.zeroGyroscope();
 
-        new ArmMoveToPositionCommand(ArmPosition.kHome).schedule();
+        new ArmMoveToPositionCommand(ArmPosition.kFolded).schedule();
     }
 
     @Override
     public void teleopPeriodic() {
         if (!m_robotContainer.getTeleopDriveCommand().isScheduled()) {
             m_robotContainer.getTeleopDriveCommand().schedule();
-        }
-
-        if (RobotContainer.requestedGamePiece == GamePiece.CONE) {
-            RobotContainer.lightingSubsystem.setConeColor();
-        } else if (RobotContainer.requestedGamePiece == GamePiece.CUBE) {
-            RobotContainer.lightingSubsystem.setCubeColor();
-        } else {
-            RobotContainer.lightingSubsystem.off();
-            System.out.println("WHY NO LIGHTS!");
         }
 
         Logger.getInstance().recordOutput("Requested GamePiece", RobotContainer.requestedGamePiece.toString());

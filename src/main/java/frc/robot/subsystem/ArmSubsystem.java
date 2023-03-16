@@ -61,9 +61,9 @@ public class ArmSubsystem extends SubsystemBase {
         wristConfig.slot0.kP = 1.0;
         wristConfig.slot0.kI = 0.0;
         wristConfig.slot0.kD = 0.2;
-        //wristConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
-        wristConfig.peakOutputForward = 0.5;
-        wristConfig.peakOutputReverse = -0.5;
+        wristConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
+        wristConfig.peakOutputForward = 0.25;
+        wristConfig.peakOutputReverse = -0.25;
         wristFalcon.configAllSettings(wristConfig);
         wristFalcon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
         wristFalcon.setInverted(true); // Flip this to true if it's driving the wrong way
@@ -86,9 +86,9 @@ public class ArmSubsystem extends SubsystemBase {
         double currentWristSpeed = 0.0;
 
         if (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) != 0.0) { // Manual control
-            currentArmSpeed = operatorController.getLeftY();
+            currentArmSpeed = -operatorController.getLeftY();
 
-            currentArmSpeed = Math.max(-0.75, Math.min(currentArmSpeed, 0.75));
+            currentArmSpeed = Math.max(-1.0, Math.min(currentArmSpeed, 1.0));
 
             if (armPot.getValue() >= Constants.ARM_MAX_ROM_VALUE) {
                 currentArmSpeed = Math.min(currentArmSpeed, 0);
@@ -146,8 +146,7 @@ public class ArmSubsystem extends SubsystemBase {
         Logger.getInstance().recordOutput("Wrist setpoint", wristSetpoint);
         Logger.getInstance().recordOutput("Wrist Position", wristFalcon.getSelectedSensorPosition());
         Logger.getInstance().recordOutput("Wrist Speed", currentWristSpeed);
-        Logger.getInstance().recordOutput("Wrist at position",
-                wristFalcon.getClosedLoopError() <= WRIST_SETPOINT_TOLERANCE);
+        Logger.getInstance().recordOutput("Wrist at position", isWristAtSetpoint());
 
         Logger.getInstance().recordOutput("Arm Mechanism", armMechanism2d);
     }
@@ -162,13 +161,17 @@ public class ArmSubsystem extends SubsystemBase {
         return armPidController.getSetpoint();
     }
 
+    public boolean isWristAtSetpoint(){
+        return wristFalcon.getClosedLoopError(0) <= WRIST_SETPOINT_TOLERANCE;
+    }
+
     public void setWristPosition(double pos) {
         pos = Math.max(Constants.WRIST_MIN_ROM_VALUE, Math.min(pos, Constants.WRIST_MAX_ROM_VALUE));
         wristSetpoint = pos;
     }
 
     public boolean isAtRequestedPosition() {
-        return armPidController.atSetpoint() && wristFalcon.getClosedLoopError() <= WRIST_SETPOINT_TOLERANCE;
+        return armPidController.atSetpoint() && isWristAtSetpoint();
     }
 
 }

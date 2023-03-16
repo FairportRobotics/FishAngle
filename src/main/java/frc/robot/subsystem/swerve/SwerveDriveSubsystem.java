@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.fairportrobotics.frc.poe.CameraTracking.RobotFieldPosition;
-import com.fairportrobotics.frc.poe.CameraTracking.WPILIB.WPI_AprilTagPoseEstimator;
 import com.kauailabs.navx.frc.AHRS;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
@@ -67,7 +67,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         private final SwerveDrivePoseEstimator poseEstimator;
 
         private RobotFieldPosition fieldPositionEstimator;
-        private WPI_AprilTagPoseEstimator fieldPoseEstimator;
 
         private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
@@ -208,14 +207,24 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 poseEstimator.update(getHeading(),
                                 getModulePositions());
 
-                if(fieldPositionEstimator != null) {
+                if (fieldPositionEstimator != null) {
                         Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
 
                         if (cameraPose.isPresent()) {
-                                poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
-                                                Timer.getFPGATimestamp());
-                                Logger.getInstance().recordOutput("PhotonVision Field Position",
-                                                cameraPose.get().estimatedPose);
+                                //Only use position if lowest target ambiguity is < 0.2
+                                double lowestAmbiguity = 1;
+                                for (PhotonTrackedTarget target : cameraPose.get().targetsUsed) {
+                                        if(target.getPoseAmbiguity() < lowestAmbiguity) {
+                                                lowestAmbiguity = target.getPoseAmbiguity();
+                                        }
+                                }
+
+                                if (lowestAmbiguity < 0.2) {
+                                        poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
+                                                        Timer.getFPGATimestamp());
+                                        Logger.getInstance().recordOutput("PhotonVision Field Position",
+                                                        cameraPose.get().estimatedPose);
+                                }
                         }
                 }
 

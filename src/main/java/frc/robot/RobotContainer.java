@@ -40,6 +40,7 @@ public class RobotContainer {
     Trigger midPosBtn;
     Trigger lowPosBtn;
     Trigger homePosBtn;
+    Trigger foldedPosBtn;
 
     Trigger gamePieceToggleBtn;
 
@@ -73,9 +74,20 @@ public class RobotContainer {
         homePosBtn = operatorController.x();
         homePosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kHome));
 
+        foldedPosBtn = operatorController.back();
+        foldedPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kFolded));
+
         gamePieceToggleBtn = operatorController.rightBumper();
         gamePieceToggleBtn.onTrue(Commands.runOnce(() -> {
             requestedGamePiece = requestedGamePiece == GamePiece.CONE ? GamePiece.CUBE : GamePiece.CONE;
+            if (requestedGamePiece == GamePiece.CONE) {
+                RobotContainer.lightingSubsystem.setConeColor();
+            } else if (requestedGamePiece == GamePiece.CUBE) {
+                RobotContainer.lightingSubsystem.setCubeColor();
+            } else {
+                RobotContainer.lightingSubsystem.off();
+                System.out.println("WHY NO LIGHTS!");
+            }
         }));
     }
 

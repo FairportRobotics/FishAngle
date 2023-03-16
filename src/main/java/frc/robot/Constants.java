@@ -32,10 +32,12 @@ public class Constants {
 
 
     public static final int[] ARM_HIGH_POS = new int[2];
+    public static final int[] ARM_HOME_POS = new int[2];
     public static final int[] ARM_MID_POS = new int[2];
     public static final int[] ARM_LOW_POS = new int[2];
 
     public static final int[] WRIST_HIGH_POS = new int[2];
+    public static final int[] WRIST_HOME_POS = new int[2];
     public static final int[] WRIST_MID_POS = new int[2];
     public static final int[] WRIST_LOW_POS = new int[2];
 
@@ -50,6 +52,9 @@ public class Constants {
         ARM_LOW_POS[GamePiece.CONE.valueOf()] = 30;
         ARM_LOW_POS[GamePiece.CUBE.valueOf()] = 30;
 
+        ARM_HOME_POS[GamePiece.CONE.valueOf()] = 5;
+        ARM_HOME_POS[GamePiece.CUBE.valueOf()] = 5;
+
         WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 59710;
         WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 59710;
 
@@ -59,10 +64,13 @@ public class Constants {
         WRIST_LOW_POS[GamePiece.CONE.valueOf()] = 39112;
         WRIST_LOW_POS[GamePiece.CUBE.valueOf()] = 39112;
 
+        WRIST_HOME_POS[GamePiece.CONE.valueOf()] = 12000;
+        WRIST_HOME_POS[GamePiece.CUBE.valueOf()] = 12000;
+
     }
 
-    public static final int ARM_HOME_POS_VAL = 0;
-    public static final int WRIST_HOME_POS_VAL = 0;
+    public static final int ARM_FOLDED_POS_VAL = 0;
+    public static final int WRIST_FOLDED_POS_VAL = 0;
 
     public static final int ARM_BRAKE_SOLENOID = 4;
 
