@@ -27,10 +27,12 @@ import frc.robot.RobotContainer;
 public class ArmSubsystem extends SubsystemBase {
 
     public static double WRIST_SETPOINT_TOLERANCE = 50.0;
+    public static double ARM_SETPOINT_TOLERANCE = 50.0;
 
     CommandXboxController operatorController;
 
     WPI_TalonFX armFalcon;
+    double armSetpoint = 0.0;
     AnalogInput armPot;
     PIDController armPidController;
     boolean armPidDone = true;
@@ -49,8 +51,16 @@ public class ArmSubsystem extends SubsystemBase {
         this.operatorController = operatorController;
 
         armFalcon = new WPI_TalonFX(Constants.ARM_FALCON_ID);
+        TalonFXConfiguration armConfig = new TalonFXConfiguration();
+        armConfig.slot0.kP = 1.0;
+        armConfig.slot0.kI = 0.0;
+        armConfig.slot0.kD = 0.2;
+        armConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
+        armConfig.peakOutputForward = 1.0;
+        armConfig.peakOutputReverse = -1.0;
+        //armFalcon.configAllSettings(armConfig);
         armFalcon.setInverted(false); // Flip this to true if it's driving the wrong way
-        armFalcon.setSelectedSensorPosition(0);
+        armFalcon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
         armFalcon.setNeutralMode(NeutralMode.Brake);
         armPot = new AnalogInput(Constants.ARM_POT_ID);
         armPidController = new PIDController(0.010, 0.0001, 0.00001); // TODO: Tune
@@ -88,7 +98,7 @@ public class ArmSubsystem extends SubsystemBase {
         if (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) != 0.0) { // Manual control
             currentArmSpeed = -operatorController.getLeftY();
 
-            currentArmSpeed = Math.max(-1.0, Math.min(currentArmSpeed, 1.0));
+            currentArmSpeed = Math.max(-0.5, Math.min(currentArmSpeed, 0.5));
 
             if (armPot.getValue() >= Constants.ARM_MAX_ROM_VALUE) {
                 currentArmSpeed = Math.min(currentArmSpeed, 0);
@@ -98,6 +108,8 @@ public class ArmSubsystem extends SubsystemBase {
 
             armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
             armPidController.setSetpoint(armPot.getValue());
+
+            armSetpoint = armFalcon.getSelectedSensorPosition();
         } else { // Setpoint
             if (!armPidDone)
                 currentArmSpeed = armPidController.calculate(armPot.getValue());
@@ -136,10 +148,10 @@ public class ArmSubsystem extends SubsystemBase {
             wristFalcon.set(ControlMode.Position, wristSetpoint);
         }
 
-        Logger.getInstance().recordOutput("Arm setpoint", armPidController.getSetpoint());
-        Logger.getInstance().recordOutput("Arm Position", armPot.getValue());
+        Logger.getInstance().recordOutput("Arm setpoint", armSetpoint);
+        Logger.getInstance().recordOutput("Arm Position", armFalcon.getSelectedSensorPosition());
         Logger.getInstance().recordOutput("Arm Speed", currentArmSpeed);
-        Logger.getInstance().recordOutput("Arm at position", armPidController.atSetpoint());
+        Logger.getInstance().recordOutput("Arm at position", isArmAtSetpoint());
 
         // Logger.getInstance().recordOutput("Arm Brake State", brakeSolenoid.get());
 
@@ -151,10 +163,16 @@ public class ArmSubsystem extends SubsystemBase {
         Logger.getInstance().recordOutput("Arm Mechanism", armMechanism2d);
     }
 
+    public boolean isArmAtSetpoint(){
+        return armFalcon.getClosedLoopError(0) <= ARM_SETPOINT_TOLERANCE;
+    }
+
     public void setArmPosition(double pos) {
         pos = Math.max(Constants.ARM_MIN_ROM_VALUE, Math.min(pos, Constants.ARM_MAX_ROM_VALUE));
         armPidController.setSetpoint(pos);
         armPidDone = false;
+
+        armSetpoint = pos;
     }
 
     public double getArmSetpoint() {
