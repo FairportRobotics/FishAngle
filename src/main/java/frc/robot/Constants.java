@@ -27,8 +27,8 @@ public class Constants {
 
     public static final int WRIST_FALCON_ID = 50;
     public static final int WRIST_POT_ID = 0;
-    public static final int WRIST_MAX_ROM_VALUE = 4096;
-    public static final int WRIST_MIN_ROM_VALUE = 274;
+    public static final int WRIST_MAX_ROM_VALUE = 68000;
+    public static final int WRIST_MIN_ROM_VALUE = 0;
 
 
     public static final int[] ARM_HIGH_POS = new int[2];
@@ -50,19 +50,19 @@ public class Constants {
         ARM_LOW_POS[GamePiece.CONE.valueOf()] = 30;
         ARM_LOW_POS[GamePiece.CUBE.valueOf()] = 30;
 
-        WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 1946;
-        WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 1946;
+        WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 59710;
+        WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 59710;
 
-        WRIST_MID_POS[GamePiece.CONE.valueOf()] = 1946;
-        WRIST_MID_POS[GamePiece.CUBE.valueOf()] = 1946;
+        WRIST_MID_POS[GamePiece.CONE.valueOf()] = 53440;
+        WRIST_MID_POS[GamePiece.CUBE.valueOf()] = 53440;
 
-        WRIST_LOW_POS[GamePiece.CONE.valueOf()] = 1946;
-        WRIST_LOW_POS[GamePiece.CUBE.valueOf()] = 1946;
+        WRIST_LOW_POS[GamePiece.CONE.valueOf()] = 39112;
+        WRIST_LOW_POS[GamePiece.CUBE.valueOf()] = 39112;
 
     }
 
     public static final int ARM_HOME_POS_VAL = 0;
-    public static final int WRIST_HOME_POS_VAL = 375;
+    public static final int WRIST_HOME_POS_VAL = 0;
 
     public static final int ARM_BRAKE_SOLENOID = 4;
 

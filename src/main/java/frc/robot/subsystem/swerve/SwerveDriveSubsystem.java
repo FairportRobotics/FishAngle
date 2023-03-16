@@ -22,8 +22,10 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -42,6 +44,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
                         Math.hypot(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
                                         Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
+
+        private final Transform3d CAM_TO_ROBOT = new Transform3d(new Translation3d(-0.0635, 0.1524, 0.7239), new Rotation3d(0,0,0));
 
         private final SwerveModule[] swerveModules = new SwerveModule[4];
         private SwerveModuleState[] moduleStates = { new SwerveModuleState(), new SwerveModuleState(),
@@ -63,7 +67,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         private final SwerveDrivePoseEstimator poseEstimator;
 
         private RobotFieldPosition fieldPositionEstimator;
-        private final WPI_AprilTagPoseEstimator fieldPoseEstimator;
+        private WPI_AprilTagPoseEstimator fieldPoseEstimator;
 
         private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
@@ -74,7 +78,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
                 ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
                 try {
-                        this.fieldPositionEstimator = new RobotFieldPosition("front-facing", new Transform3d(),
+                        this.fieldPositionEstimator = new RobotFieldPosition("front-facing", CAM_TO_ROBOT,
                                         AprilTagFields.k2023ChargedUp,
                                         PoseStrategy.CLOSEST_TO_LAST_POSE);
                 } catch (IOException e) {
@@ -137,7 +141,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 UsbCamera cam = CameraServer.startAutomaticCapture();
                 System.out.println(cam.getInfo().name);
 
-                fieldPoseEstimator = new WPI_AprilTagPoseEstimator(cam);
+                //fieldPoseEstimator = new WPI_AprilTagPoseEstimator(cam);
                 // fieldPoseEstimator.runDetectorPipeline();
 
                 simVelocityX = new SlewRateLimiter(10);
@@ -204,16 +208,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 poseEstimator.update(getHeading(),
                                 getModulePositions());
 
-                Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
+                if(fieldPositionEstimator != null) {
+                        Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
 
-                if (cameraPose.isPresent()) {
-                        poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
-                                        Timer.getFPGATimestamp());
-                        Logger.getInstance().recordOutput("PhotonVision Field Position",
-                                        cameraPose.get().estimatedPose);
+                        if (cameraPose.isPresent()) {
+                                poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
+                                                Timer.getFPGATimestamp());
+                                Logger.getInstance().recordOutput("PhotonVision Field Position",
+                                                cameraPose.get().estimatedPose);
+                        }
                 }
-
-                Logger.getInstance().recordOutput("AprilTagPose", fieldPoseEstimator.getEstimatedGlobalPose());
 
                 // Logging
                 Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());

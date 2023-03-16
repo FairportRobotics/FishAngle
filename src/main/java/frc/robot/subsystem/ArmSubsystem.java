@@ -61,7 +61,9 @@ public class ArmSubsystem extends SubsystemBase {
         wristConfig.slot0.kP = 1.0;
         wristConfig.slot0.kI = 0.0;
         wristConfig.slot0.kD = 0.2;
-        wristConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
+        //wristConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
+        wristConfig.peakOutputForward = 0.5;
+        wristConfig.peakOutputReverse = -0.5;
         wristFalcon.configAllSettings(wristConfig);
         wristFalcon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
         wristFalcon.setInverted(true); // Flip this to true if it's driving the wrong way
@@ -86,7 +88,7 @@ public class ArmSubsystem extends SubsystemBase {
         if (MathUtil.applyDeadband(operatorController.getLeftY(), 0.1) != 0.0) { // Manual control
             currentArmSpeed = operatorController.getLeftY();
 
-            currentArmSpeed = Math.max(-0.5, Math.min(currentArmSpeed, 0.5));
+            currentArmSpeed = Math.max(-0.75, Math.min(currentArmSpeed, 0.75));
 
             if (armPot.getValue() >= Constants.ARM_MAX_ROM_VALUE) {
                 currentArmSpeed = Math.min(currentArmSpeed, 0);
