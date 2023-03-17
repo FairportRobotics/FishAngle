@@ -1,7 +1,6 @@
 package frc.robot.subsystem.swerve;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
@@ -15,11 +14,8 @@ import com.kauailabs.navx.frc.AHRS;
 import com.swervedrivespecialties.swervelib.MechanicalConfiguration;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
-import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
@@ -28,6 +24,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -251,7 +248,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 }
 
 
-                // Within distance to collect the thing (Will not work if cam cannot see april tag)
+                // Within distance to collect a cone or cube from substation 
                 aprilTags.freeze();
                 if(aprilTags.hasTargets() && (aprilTags.getClosestTarget().getFiducialId() == 5 || aprilTags.getClosestTarget().getFiducialId() == 4)) {
                         Transform3d robotToCam = aprilTags.getClosestTarget().getBestCameraToTarget().plus(CAM_TO_ROBOT.inverse());
@@ -264,24 +261,55 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                                 controller.getHID().setRumble(RumbleType.kBothRumble, 0);
                         }
                 } else {
-                        try {
-                                AprilTagFieldLayout aprilTagList = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
-
-                                Logger.getInstance().recordOutput("Number 5 Pose", aprilTagList.getTagPose(5).get());
-                                Logger.getInstance().recordOutput("Number 4 Pose", aprilTagList.getTagPose(4).get());
-
-                        } catch(Exception e) {
-                                e.printStackTrace();
+                        Pose2d aprilTagFourPos = new Pose2d(new Translation2d(16.178784, 6.749796), new Rotation2d(Math.toRadians(180)));
+                        Pose2d aprilTagFivePos = new Pose2d(new Translation2d(0.36195, 6.749796), new Rotation2d());
+                        Transform2d distToFour = getPose().minus(aprilTagFourPos);
+                        Transform2d distToFive = getPose().minus(aprilTagFivePos);
+                        if(Math.abs(distToFour.getX()) < 1.016 && Math.abs(distToFour.getTranslation().getY()) < 1.31445 
+                                && aprilTagFourPos.getRotation().getDegrees() > getPose().getRotation().getDegrees() - 25
+                                && aprilTagFourPos.getRotation().getDegrees() < getPose().getRotation().getDegrees() + 25) {
+                                Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
+                                controller.getHID().setRumble(RumbleType.kBothRumble, 0.5);
+                        } else if(Math.abs(distToFive.getX()) < 1.016 && Math.abs(distToFive.getTranslation().getY()) < 1.31445
+                                && aprilTagFivePos.getRotation().getDegrees() > getPose().getRotation().getDegrees() - 25
+                                && aprilTagFivePos.getRotation().getDegrees() < getPose().getRotation().getDegrees() + 25) {
+                                Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
+                                controller.getHID().setRumble(RumbleType.kBothRumble, 0.5);
+                        } else {
+                                Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
+                                controller.getHID().setRumble(RumbleType.kBothRumble, 0);
                         }
-                        Transform3d aprilTagFourPos = new Transform3d(new Translation3d(16.178784, 6.749796, 6.749796), new Rotation3d());
-                        Transform3d aprilTagFivePos = new Transform3d(new Translation3d(0.36195, 6.749796, 0.695452), new Rotation3d());
 
-                        Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
-                        controller.getHID().setRumble(RumbleType.kBothRumble, 0);
-
-                        
                 }
                 aprilTags.unFreeze();
+
+                //Figure out if we can drop a cone or cube into the grid (with diff levels)
+                /*
+                double blueAllianceGridX = 1.396492;
+                double redAllianceGridX = 15.144496;
+                double gridY = 5.491226;
+                double mid = 7.90829;
+                if(getPose().getY() <= 5.491226 && getPose().getY() > 0) {
+                        if((getPose().getX() < 4.90829 && getPose().getRotation().getDegrees() > 270 && getPose().getRotation().getDegrees() < 30) ||
+                                (getPose().getX() > 4.90829 && getPose().getRotation().getDegrees() > 150 && getPose().getRotation().getDegrees() < 210)) {
+                                if(getPose().getX() <= blueAllianceGridX + 0.215138 || getPose().getX() >= redAllianceGridX - 0.215138) {
+                                        Logger.getInstance().recordOutput("Robot Grid Placement", "Top");
+                                } else if(getPose().getX() <= blueAllianceGridX + 0.646938 || getPose().getX() >= redAllianceGridX - 0.646938) {
+                                        Logger.getInstance().recordOutput("Robot Grid Placement", "Middle");
+                                } else if(getPose().getX() <= blueAllianceGridX + 1.016 || getPose().getX() >= redAllianceGridX - 1.016) {
+                                        Logger.getInstance().recordOutput("Robot Grid Placement", "Bottom");
+                                } else {
+                                        Logger.getInstance().recordOutput("Robot Grid Placement", "None");
+                                }
+                        } else {
+                                Logger.getInstance().recordOutput("Robot Within Grid Dist", false);
+                                controller.getHID().setRumble(RumbleType.kBothRumble, 0);
+                        }
+
+                        }
+                }
+                */
+                
 
                 // Logging
                 Logger.getInstance().recordOutput("Odometry Field Position", odometry.getPoseMeters());
