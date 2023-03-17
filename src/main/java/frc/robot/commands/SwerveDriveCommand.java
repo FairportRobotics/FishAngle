@@ -29,7 +29,7 @@ public class SwerveDriveCommand extends CommandBase {
         rot = MathUtil.applyDeadband(rot, 0.05);
 
         driveSubsystem.drive(
-                ChassisSpeeds.fromFieldRelativeSpeeds(forward * 2, strafe * 2, rot * 6, driveSubsystem.getRotation()));
+                ChassisSpeeds.fromFieldRelativeSpeeds(forward * 2.25, strafe * 2.25, rot * 6, driveSubsystem.getRotation()));
 
     }
 

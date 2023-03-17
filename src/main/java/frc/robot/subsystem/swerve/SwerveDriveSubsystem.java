@@ -52,7 +52,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         Math.hypot(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
                                         Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
-        private final Transform3d CAM_TO_ROBOT = new Transform3d(new Translation3d(-0.0635, 0.1524, 0.7239), new Rotation3d(0,0,0));
+        private final Transform3d CAM_TO_ROBOT = new Transform3d(new Translation3d(-0.0635, 0.1524, 0.7239),
+                        new Rotation3d(0, 0, 0));
 
         private final SwerveModule[] swerveModules = new SwerveModule[4];
         private SwerveModuleState[] moduleStates = { new SwerveModuleState(), new SwerveModuleState(),
@@ -85,12 +86,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         private CommandXboxController controller;
 
         private static final MechanicalConfiguration MK4I_L1 = new MechanicalConfiguration(
-                0.10033,
-                (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0),
-                false,
-                (14.0 / 50.0) * (10.0 / 60.0),
-                false
-        );
+                        0.10033,
+                        (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0),
+                        false,
+                        (14.0 / 50.0) * (10.0 / 60.0),
+                        false);
 
         public SwerveDriveSubsystem(CommandXboxController controller) {
                 this.controller = controller;
@@ -162,7 +162,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
                 aprilTags = new AprilTags("front-facing");
 
-                //fieldPoseEstimator = new WPI_AprilTagPoseEstimator(cam);
+                // fieldPoseEstimator = new WPI_AprilTagPoseEstimator(cam);
                 // fieldPoseEstimator.runDetectorPipeline();
 
                 simVelocityX = new SlewRateLimiter(10);
@@ -229,57 +229,68 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 poseEstimator.update(getHeading(),
                                 getModulePositions());
 
-                if (fieldPositionEstimator != null) {
-                        Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
 
-                        if (cameraPose.isPresent()) {
-                                //Only use position if lowest target ambiguity is < 0.2
-                                double lowestAmbiguity = 1;
-                                for (PhotonTrackedTarget target : cameraPose.get().targetsUsed) {
-                                        if(target.getPoseAmbiguity() < lowestAmbiguity) {
-                                                lowestAmbiguity = target.getPoseAmbiguity();
-                                        }
-                                }
+                fieldPositionEstimator.setLastPose(getPose());
+                Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
 
-                                if (lowestAmbiguity < 0.2) {
-                                        poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
-                                                        Timer.getFPGATimestamp());
-                                        Logger.getInstance().recordOutput("PhotonVision Field Position",
-                                                        cameraPose.get().estimatedPose);
+                Logger.getInstance().recordOutput("PhotonVision has target", cameraPose.isPresent());
+
+                if (cameraPose.isPresent()) {
+                        // Only use position if lowest target ambiguity is < 0.2
+                        double lowestAmbiguity = 1;
+                        for (PhotonTrackedTarget target : cameraPose.get().targetsUsed) {
+                                if (target.getPoseAmbiguity() < lowestAmbiguity) {
+                                        lowestAmbiguity = target.getPoseAmbiguity();
                                 }
                         }
+
+                        poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
+                                        Timer.getFPGATimestamp());
+                        Logger.getInstance().recordOutput("PhotonVision Field Position",
+                                        cameraPose.get().estimatedPose);
+
+                        // if (lowestAmbiguity < 0.2) {
+                        // poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
+                        // Timer.getFPGATimestamp());
+                        // Logger.getInstance().recordOutput("PhotonVision Field Position",
+                        // cameraPose.get().estimatedPose);
+                        // }
                 }
 
-
-                // Within distance to collect the thing (Will not work if cam cannot see april tag)
+                // Within distance to collect the thing (Will not work if cam cannot see april
+                // tag)
                 aprilTags.freeze();
-                if(aprilTags.hasTargets() && (aprilTags.getClosestTarget().getFiducialId() == 5 || aprilTags.getClosestTarget().getFiducialId() == 4)) {
-                        Transform3d robotToCam = aprilTags.getClosestTarget().getBestCameraToTarget().plus(CAM_TO_ROBOT.inverse());
-                        if(robotToCam.getX() < 1.016 && Math.abs(robotToCam.getY()) < 1.31445) {
+                if (aprilTags.hasTargets() && (aprilTags.getClosestTarget().getFiducialId() == 5
+                                || aprilTags.getClosestTarget().getFiducialId() == 4)) {
+                        Transform3d robotToCam = aprilTags.getClosestTarget().getBestCameraToTarget()
+                                        .plus(CAM_TO_ROBOT.inverse());
+                        if (robotToCam.getX() < 1.016 && Math.abs(robotToCam.getY()) < 1.31445) {
                                 Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
                                 controller.getHID().setRumble(RumbleType.kBothRumble, 0.5);
-                                
+
                         } else {
                                 Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
                                 controller.getHID().setRumble(RumbleType.kBothRumble, 0);
                         }
                 } else {
                         try {
-                                AprilTagFieldLayout aprilTagList = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+                                AprilTagFieldLayout aprilTagList = AprilTagFieldLayout
+                                                .loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
 
                                 Logger.getInstance().recordOutput("Number 5 Pose", aprilTagList.getTagPose(5).get());
                                 Logger.getInstance().recordOutput("Number 4 Pose", aprilTagList.getTagPose(4).get());
 
-                        } catch(Exception e) {
+                        } catch (Exception e) {
                                 e.printStackTrace();
                         }
-                        Transform3d aprilTagFourPos = new Transform3d(new Translation3d(16.178784, 6.749796, 6.749796), new Rotation3d());
-                        Transform3d aprilTagFivePos = new Transform3d(new Translation3d(0.36195, 6.749796, 0.695452), new Rotation3d());
+                        Transform3d aprilTagFourPos = new Transform3d(new Translation3d(16.178784, 6.749796, 6.749796),
+                                        new Rotation3d());
+                        Transform3d aprilTagFivePos = new Transform3d(new Translation3d(0.36195, 6.749796, 0.695452),
+                                        new Rotation3d());
 
                         Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
                         controller.getHID().setRumble(RumbleType.kBothRumble, 0);
 
-                        
                 }
                 aprilTags.unFreeze();
 
