@@ -11,12 +11,11 @@ import frc.robot.commands.GripperCommand.GripperAction;
 public class OneCubeAutoCommand extends SequentialCommandGroup {
     public OneCubeAutoCommand() {
         addCommands(
-            new ParallelDeadlineGroup(
-                    new SwerveDrivePathCommand("One_Cube_Place", true),
-                    new ArmMoveToPositionCommand(ArmPosition.kHome),
-                    new GripperCommand(GripperAction.kClose)),
-            new ArmMoveToPositionCommand(ArmPosition.kMid),
-            new GripperCommand(GripperAction.kOpen)
-        );
+                new GripperCommand(GripperAction.kClose),
+                new ArmMoveToPositionCommand(ArmPosition.kMid),
+                new ParallelDeadlineGroup(
+                        new SwerveDrivePathCommand("One_Cube_Place", true)),
+                new ArmMoveToPositionCommand(ArmPosition.kMid),
+                new GripperCommand(GripperAction.kOpen));
     }
 }

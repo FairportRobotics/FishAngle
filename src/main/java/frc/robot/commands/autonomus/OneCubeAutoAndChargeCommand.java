@@ -9,15 +9,19 @@ import frc.robot.commands.SwerveDrivePathCommand;
 import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
 import frc.robot.commands.GripperCommand.GripperAction;
 
-public class OneConeAutoCommand extends SequentialCommandGroup {
-    public OneConeAutoCommand() {
+public class OneCubeAutoAndChargeCommand extends SequentialCommandGroup {
+    public OneCubeAutoAndChargeCommand() {
         addCommands(
                 new GripperCommand(GripperAction.kClose),
                 new ArmMoveToPositionCommand(ArmPosition.kMid),
                 new ParallelDeadlineGroup(
-                        new SwerveDrivePathCommand("One_Cone_Place", true)),
+                        new SwerveDrivePathCommand("One_Cube_Place", true)),
                 new ArmMoveToPositionCommand(ArmPosition.kMid),
-                // new WaitCommand(1.0),
-                new GripperCommand(GripperAction.kOpen));
+                new GripperCommand(GripperAction.kOpen),
+                new WaitCommand(0.5),
+                new ParallelDeadlineGroup(
+                        new SwerveDrivePathCommand("One_Cube_Charge", true),
+                        new ArmMoveToPositionCommand(ArmPosition.kHome)),
+                new GripperCommand(GripperAction.kClose));
     }
 }

@@ -23,6 +23,8 @@ import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
 import frc.robot.commands.autonomus.LeaveZoneAndChargeAutoCommand;
 import frc.robot.commands.autonomus.LeaveZoneAutoCommand;
 import frc.robot.commands.autonomus.OneConeAutoCommand;
+import frc.robot.commands.autonomus.OneCubeAutoAndChargeCommand;
+import frc.robot.commands.autonomus.OneCubeAutoAndLeaveCommand;
 import frc.robot.commands.autonomus.OneCubeAutoCommand;
 import frc.robot.commands.autonomus.TwoCubeAutoCommand;
 import frc.robot.commands.autonomus.TwoCubeChargeAutoCommand;
@@ -77,6 +79,8 @@ public class Robot extends LoggedRobot {
         autoChooser.addOption("Leave Zone and Charge", new LeaveZoneAndChargeAutoCommand());
         autoChooser.addOption("One Cone", new OneConeAutoCommand());
         autoChooser.addOption("One Cube", new OneCubeAutoCommand());
+        autoChooser.addOption("One Cube And Leave", new OneCubeAutoAndLeaveCommand());
+        autoChooser.addOption("One Cube And Charge", new OneCubeAutoAndChargeCommand());
         autoChooser.addOption("Two Cube", new TwoCubeAutoCommand());
         autoChooser.addOption("Two Cube and Charge", new TwoCubeChargeAutoCommand());
 
