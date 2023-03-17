@@ -33,9 +33,6 @@ public class ArmSubsystem extends SubsystemBase {
 
     WPI_TalonFX armFalcon;
     double armSetpoint = 0.0;
-    AnalogInput armPot;
-    PIDController armPidController;
-    boolean armPidDone = true;
 
     WPI_TalonFX wristFalcon;
     double wristSetpoint = 0.0;
@@ -97,14 +94,13 @@ public class ArmSubsystem extends SubsystemBase {
 
             currentArmSpeed = Math.max(-0.5, Math.min(currentArmSpeed, 0.5));
 
-            if (armPot.getValue() >= Constants.ARM_MAX_ROM_VALUE) {
+            if (armFalcon.getSelectedSensorPosition() >= Constants.ARM_MAX_ROM_VALUE) {
                 currentArmSpeed = Math.min(currentArmSpeed, 0);
-            } else if (armPot.getValue() <= Constants.ARM_MIN_ROM_VALUE) {
+            } else if (armFalcon.getSelectedSensorPosition() <= Constants.ARM_MIN_ROM_VALUE) {
                 currentArmSpeed = Math.max(currentArmSpeed, 0);
             }
 
             armFalcon.set(ControlMode.PercentOutput, currentArmSpeed);
-            armPidController.setSetpoint(armPot.getValue());
 
             armSetpoint = armFalcon.getSelectedSensorPosition();
         } else { // Setpoint

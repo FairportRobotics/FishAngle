@@ -270,18 +270,19 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                                 controller.getHID().setRumble(RumbleType.kBothRumble, 0);
                         }
                 } else {
-                        Pose2d aprilTagFourPos = new Pose2d(new Translation2d(16.178784, 6.749796), new Rotation2d(Math.toRadians(180)));
-                        Pose2d aprilTagFivePos = new Pose2d(new Translation2d(0.36195, 6.749796), new Rotation2d());
-                        Transform2d distToFour = getPose().minus(aprilTagFourPos);
-                        Transform2d distToFive = getPose().minus(aprilTagFivePos);
+                        Pose2d aprilTagFourPos = new Pose2d(new Translation2d(16.178784, 6.749796), new Rotation2d());
+                        Pose2d aprilTagFivePos = new Pose2d(new Translation2d(0.36195, 6.749796), new Rotation2d(Math.toRadians(180)));
+                        Transform2d distToFour = poseEstimator.getEstimatedPosition().minus(aprilTagFourPos);
+                        Transform2d distToFive = poseEstimator.getEstimatedPosition().minus(aprilTagFivePos);
+                        
                         if(Math.abs(distToFour.getX()) < 1.016 && Math.abs(distToFour.getTranslation().getY()) < 1.31445 
-                                && aprilTagFourPos.getRotation().getDegrees() > getPose().getRotation().getDegrees() - 25
-                                && aprilTagFourPos.getRotation().getDegrees() < getPose().getRotation().getDegrees() + 25) {
+                                && aprilTagFourPos.getRotation().getDegrees() > poseEstimator.getEstimatedPosition().getRotation().getDegrees() - 25
+                                && aprilTagFourPos.getRotation().getDegrees() < poseEstimator.getEstimatedPosition().getRotation().getDegrees() + 25) {
                                 Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
                                 controller.getHID().setRumble(RumbleType.kBothRumble, 0.5);
                         } else if(Math.abs(distToFive.getX()) < 1.016 && Math.abs(distToFive.getTranslation().getY()) < 1.31445
-                                && aprilTagFivePos.getRotation().getDegrees() > getPose().getRotation().getDegrees() - 25
-                                && aprilTagFivePos.getRotation().getDegrees() < getPose().getRotation().getDegrees() + 25) {
+                                && aprilTagFivePos.getRotation().getDegrees() > poseEstimator.getEstimatedPosition().getRotation().getDegrees() - 25
+                                && aprilTagFivePos.getRotation().getDegrees() < poseEstimator.getEstimatedPosition().getRotation().getDegrees() + 25) {
                                 Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
                                 controller.getHID().setRumble(RumbleType.kBothRumble, 0.5);
                         } else {
