@@ -24,8 +24,8 @@ public class SwerveDriveCommand extends CommandBase {
         double forward = driverController.getLeftY() * Math.abs(driverController.getLeftY());
         double rot = driverController.getRightX() * Math.abs(driverController.getRightX());
 
-        forward = MathUtil.applyDeadband(forward, 0.05);
-        strafe = MathUtil.applyDeadband(strafe, 0.05);
+        forward = -MathUtil.applyDeadband(forward, 0.05);
+        strafe = -MathUtil.applyDeadband(strafe, 0.05);
         rot = MathUtil.applyDeadband(rot, 0.05);
 
         driveSubsystem.drive(
