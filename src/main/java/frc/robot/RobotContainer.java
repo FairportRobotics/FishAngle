@@ -37,6 +37,7 @@ public class RobotContainer {
 
     Trigger toggleGripperBtn;
     Trigger highPosBtn;
+    Trigger stationPosBtn;
     Trigger midPosBtn;
     Trigger lowPosBtn;
     Trigger homePosBtn;
@@ -64,6 +65,9 @@ public class RobotContainer {
 
         highPosBtn = operatorController.y();
         highPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kHigh));
+
+        stationPosBtn = operatorController.povUp();
+        stationPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kStation));
 
         midPosBtn = operatorController.b();
         midPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kMid));

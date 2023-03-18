@@ -41,6 +41,10 @@ public class ArmMoveToPositionCommand extends CommandBase {
                 armPos = Constants.ARM_MID_POS[requestedGamePiece.valueOf()];
                 wristPos = Constants.WRIST_MID_POS[requestedGamePiece.valueOf()];
                 break;
+            case kStation:
+                armPos = Constants.ARM_STATION_POS[requestedGamePiece.valueOf()];
+                wristPos = Constants.WRIST_STATION_POS[requestedGamePiece.valueOf()];
+                break;
             case kHigh:
                 armPos = Constants.ARM_HIGH_POS[requestedGamePiece.valueOf()];
                 wristPos = Constants.WRIST_HIGH_POS[requestedGamePiece.valueOf()];
@@ -63,6 +67,7 @@ public class ArmMoveToPositionCommand extends CommandBase {
         kHome,
         kLow,
         kMid,
+        kStation,
         kHigh
     }
 
