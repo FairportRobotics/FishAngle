@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class LightingSubsystem extends SubsystemBase {
 
     ArduinoLightingController lightingController;
+    String currentColor = "";
 
     public LightingSubsystem() {
         try {
@@ -32,18 +33,35 @@ public class LightingSubsystem extends SubsystemBase {
     
     //Color rgb values have to be a multiple of 5 otherwise the arduino will never get the color correct
     public void setCubeColor() {
-        if (lightingController != null)
+        if (lightingController != null) {
             this.lightingController.fillAll("155060180");
+            currentColor = "155060180";
+        }
     }
 
     public void setConeColor() {
-        if (lightingController != null)
+        if (lightingController != null) {
             this.lightingController.fillAll("235185000");
+            currentColor = "235185000";
+        }
+    }
+
+    public void setColor(String color) {
+        if (lightingController != null) {
+            this.lightingController.fillAll(color);
+            currentColor = color;
+        }
     }
 
     public void rainbow() {
-        if (lightingController != null)
+        if (lightingController != null) {
             this.lightingController.fillRainbow();
+            currentColor = "rainbow";
+        }
+    }
+
+    public String getColor() {
+        return currentColor;
     }
 
     public ArduinoLightingController getLightingController(){

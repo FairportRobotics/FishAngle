@@ -48,8 +48,8 @@ public class Constants {
         ARM_HIGH_POS[GamePiece.CONE.valueOf()] = 225349;
         ARM_HIGH_POS[GamePiece.CUBE.valueOf()] = 225349;
 
-        ARM_STATION_POS[GamePiece.CONE.valueOf()] = 201610;
-        ARM_STATION_POS[GamePiece.CUBE.valueOf()] = 201610;
+        ARM_STATION_POS[GamePiece.CONE.valueOf()] = 215600;
+        ARM_STATION_POS[GamePiece.CUBE.valueOf()] = 206400;
 
         ARM_MID_POS[GamePiece.CONE.valueOf()] = 171579;
         ARM_MID_POS[GamePiece.CUBE.valueOf()] = 171579;
@@ -63,8 +63,8 @@ public class Constants {
         WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 59710;
         WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 59710;
 
-        WRIST_STATION_POS[GamePiece.CONE.valueOf()] = 54300;
-        WRIST_STATION_POS[GamePiece.CUBE.valueOf()] = 54300;
+        WRIST_STATION_POS[GamePiece.CONE.valueOf()] = 59700;
+        WRIST_STATION_POS[GamePiece.CUBE.valueOf()] = 58000;
         
         WRIST_MID_POS[GamePiece.CONE.valueOf()] = 53440;
         WRIST_MID_POS[GamePiece.CUBE.valueOf()] = 53440;
@@ -123,7 +123,7 @@ public class Constants {
 
     public static final int PH_CAN_ID = 18;
 
-    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 1 : 0;
+    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 0 : 0;
     public static final double PP_PID_I = CURRENT_MODE == Mode.REAL ? 0 : 0;
     public static final double PP_PID_D = CURRENT_MODE == Mode.REAL ? 0 : 0;
 

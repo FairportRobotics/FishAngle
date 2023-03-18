@@ -41,6 +41,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
         private static final double MAX_VOLTAGE = 12.0;
@@ -83,6 +84,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         private AprilTags aprilTags;
 
         private CommandXboxController controller;
+
+        private String prevColor = "";
 
         private static final MechanicalConfiguration MK4I_L1 = new MechanicalConfiguration(
                         0.10033,
@@ -167,7 +170,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 simVelocityX = new SlewRateLimiter(10);
                 simVelocityY = new SlewRateLimiter(10);
         }
-
+        
         public void zeroGyroscope() {
                 odometry.resetPosition(getHeading(),
                                 getModulePositions(),
@@ -265,11 +268,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                                         .plus(CAM_TO_ROBOT.inverse());
                         if (robotToCam.getX() < 1.5 && Math.abs(robotToCam.getY()) < 1.31445) {
                                 Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
-                                controller.getHID().setRumble(RumbleType.kBothRumble, 0.8);
-
+                                controller.getHID().setRumble(RumbleType.kBothRumble, 1);
+                                if(prevColor.equals("")) { prevColor = RobotContainer.lightingSubsystem.getColor(); }
+                                RobotContainer.lightingSubsystem.setColor("000255000");
                         } else {
                                 Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
                                 controller.getHID().setRumble(RumbleType.kBothRumble, 0);
+                                //if(!prevColor.equals("rainbow")) { RobotContainer.lightingSubsystem.rainbow(); }
+                                //else if(!prevColor.equals("")) { RobotContainer.lightingSubsystem.setColor(prevColor); }
                         }
                 } else {
                         Pose2d aprilTagFourPos = new Pose2d(new Translation2d(16.178784, 6.749796), new Rotation2d());
@@ -281,15 +287,21 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                                 && aprilTagFourPos.getRotation().getDegrees() > poseEstimator.getEstimatedPosition().getRotation().getDegrees() - 25
                                 && aprilTagFourPos.getRotation().getDegrees() < poseEstimator.getEstimatedPosition().getRotation().getDegrees() + 25) {
                                 Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
-                                controller.getHID().setRumble(RumbleType.kBothRumble, 0.8);
+                                controller.getHID().setRumble(RumbleType.kBothRumble, 1);
+                                //if(prevColor.equals("")) { prevColor = RobotContainer.lightingSubsystem.getColor(); }
+                                //RobotContainer.lightingSubsystem.setColor("000255000");
                         } else if(Math.abs(distToFive.getX()) < 1.5 && Math.abs(distToFive.getTranslation().getY()) < 1.31445
                                 && aprilTagFivePos.getRotation().getDegrees() > poseEstimator.getEstimatedPosition().getRotation().getDegrees() - 25
                                 && aprilTagFivePos.getRotation().getDegrees() < poseEstimator.getEstimatedPosition().getRotation().getDegrees() + 25) {
                                 Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
-                                controller.getHID().setRumble(RumbleType.kBothRumble, 0.8);
+                                controller.getHID().setRumble(RumbleType.kBothRumble, 1);
+                                if(prevColor.equals("")) { prevColor = RobotContainer.lightingSubsystem.getColor(); }
+                                //RobotContainer.lightingSubsystem.setColor("00025500");
                         } else {
                                 Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
                                 controller.getHID().setRumble(RumbleType.kBothRumble, 0);
+                                //if(!prevColor.equals("rainbow")) { RobotContainer.lightingSubsystem.rainbow(); }
+                                //else if(!prevColor.equals("")) { RobotContainer.lightingSubsystem.setColor(prevColor); }
                         }
 
                 }
