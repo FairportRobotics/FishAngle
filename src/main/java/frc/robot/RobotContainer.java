@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.ArmMoveToPositionCommand;
+import frc.robot.commands.AutoPlaceCommand;
 import frc.robot.commands.GripperCommand;
 import frc.robot.commands.SwerveDriveCommand;
 import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
@@ -38,6 +39,9 @@ public class RobotContainer {
     Trigger toggleGripperBtn;
     Trigger highPosBtn;
     Trigger stationPosBtn;
+    Trigger autoPlaceTopBtn;
+    Trigger autoPlaceMidBtn;
+    Trigger autoPlaceLowBtn;
     Trigger midPosBtn;
     Trigger lowPosBtn;
     Trigger homePosBtn;
@@ -66,8 +70,17 @@ public class RobotContainer {
         highPosBtn = operatorController.y();
         highPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kHigh));
 
-        stationPosBtn = operatorController.povUp();
+        stationPosBtn = operatorController.povLeft();
         stationPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kStation));
+
+        autoPlaceTopBtn = operatorController.povUp();
+        autoPlaceTopBtn.onTrue(new AutoPlaceCommand(AutoPlaceCommand.GridHeight.HIGH));
+
+        autoPlaceMidBtn = operatorController.povRight();
+        autoPlaceMidBtn.onTrue(new AutoPlaceCommand(AutoPlaceCommand.GridHeight.MID));
+
+        autoPlaceLowBtn = operatorController.povDown();
+        autoPlaceLowBtn.onTrue(new AutoPlaceCommand(AutoPlaceCommand.GridHeight.LOW));
 
         midPosBtn = operatorController.b();
         midPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kMid));
