@@ -51,15 +51,16 @@ public class GoToPostitionCommand extends CommandBase {
         double xVelocity;
         double yVelocity;
         double rotationVelocity = maxRotationVelocity;
-        if(Math.max(xDist, yDist) == xDist) {
+
+        if(xDist == 0 && yDist == 0 && rotationDist == 0) { return; }
+
+        if(rotationDist / rotationVelocity > Math.max(xDist, yDist) / maxMovementVelocity) {
+            xVelocity = (targetPose.getX() - currentPose.getX()) / (rotationDist / rotationVelocity);
+            yVelocity = (targetPose.getY() - currentPose.getY()) / (rotationDist / rotationVelocity);
+        } else if(xDist >= yDist) {
             xVelocity = currentPose.getX() - targetPose.getX() < 0 ? maxMovementVelocity : -maxMovementVelocity;
-            //if the rotation wouldn't finish in time, scale down the velocity
-            if(rotationDist / rotationVelocity > Math.abs(xDist / xVelocity)) {
-                xVelocity = (targetPose.getX() - currentPose.getX()) / (rotationDist / rotationVelocity);
-                yVelocity = (targetPose.getY() - currentPose.getY()) / (rotationDist / rotationVelocity);
-            } else {
-                yVelocity = (currentPose.getY() - targetPose.getY()) / (currentPose.getX() - targetPose.getX()) * xVelocity;
-            }
+            yVelocity = (currentPose.getY() - targetPose.getY()) / (currentPose.getX() - targetPose.getX()) * xVelocity;
+
             //if the x/y wouldn't finish in time, scale down the rotation
             if(rotationDist / rotationVelocity < Math.abs(xDist / xVelocity)) {
                 rotationVelocity /= xDist / Math.abs(xVelocity) / rotationDist * rotationVelocity;
@@ -67,13 +68,8 @@ public class GoToPostitionCommand extends CommandBase {
 
         } else {
             yVelocity = currentPose.getY() - targetPose.getY() < 0 ? maxMovementVelocity : -maxMovementVelocity;
-            //if the rotation wouldn't finish in time, scale down the velocity
-            if(rotationDist / rotationVelocity > Math.abs(yDist / yVelocity)) {
-                yVelocity = (targetPose.getY() - currentPose.getY()) / (rotationDist / rotationVelocity);
-                xVelocity = (targetPose.getX() - currentPose.getX()) / (rotationDist / rotationVelocity);
-            } else {
-                xVelocity = (currentPose.getX() - targetPose.getX()) / (currentPose.getY() - targetPose.getY()) * yVelocity;
-            }
+            xVelocity = (currentPose.getX() - targetPose.getX()) / (currentPose.getY() - targetPose.getY()) * yVelocity;
+
             //if the x/y wouldn't finish in time, scale down the rotation
             if(rotationDist / rotationVelocity < Math.abs(yDist / yVelocity)) {
                 rotationVelocity /= yDist / Math.abs(yVelocity) / rotationDist * rotationVelocity;

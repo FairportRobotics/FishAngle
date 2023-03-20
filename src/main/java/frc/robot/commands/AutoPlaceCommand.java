@@ -7,6 +7,9 @@ import frc.robot.subsystem.swerve.SwerveDriveSubsystem;
 public class AutoPlaceCommand extends SequentialCommandGroup {
     SwerveDriveSubsystem swerveDriveSubsystem;
 
+    /*
+    * Pretty Straightforward, visualization/simulation at https://declipsonator.github.io/frc-field-testing/
+     */
     public AutoPlaceCommand(GridHeight height) {
         swerveDriveSubsystem = RobotContainer.swerveDriveSubsystem;
 
