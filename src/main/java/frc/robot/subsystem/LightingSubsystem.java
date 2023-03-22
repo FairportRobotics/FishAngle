@@ -60,6 +60,11 @@ public class LightingSubsystem extends SubsystemBase {
         }
     }
 
+    public void shiftWrap() {
+        if (lightingController != null) {
+            this.lightingController.shiftWrap();
+        }
+    }
     public String getColor() {
         return currentColor;
     }

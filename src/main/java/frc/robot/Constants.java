@@ -45,14 +45,14 @@ public class Constants {
 
     static {
 
-        ARM_HIGH_POS[GamePiece.CONE.valueOf()] = 225349;
-        ARM_HIGH_POS[GamePiece.CUBE.valueOf()] = 225349;
+        ARM_HIGH_POS[GamePiece.CONE.valueOf()] = 208300;
+        ARM_HIGH_POS[GamePiece.CUBE.valueOf()] = 208300;
 
         ARM_STATION_POS[GamePiece.CONE.valueOf()] = 215600;
         ARM_STATION_POS[GamePiece.CUBE.valueOf()] = 206400;
 
-        ARM_MID_POS[GamePiece.CONE.valueOf()] = 171579;
-        ARM_MID_POS[GamePiece.CUBE.valueOf()] = 171579;
+        ARM_MID_POS[GamePiece.CONE.valueOf()] = 171200;
+        ARM_MID_POS[GamePiece.CUBE.valueOf()] = 171200;
 
         ARM_LOW_POS[GamePiece.CONE.valueOf()] = 30000;
         ARM_LOW_POS[GamePiece.CUBE.valueOf()] = 30000;
@@ -60,14 +60,14 @@ public class Constants {
         ARM_HOME_POS[GamePiece.CONE.valueOf()] = 30000;
         ARM_HOME_POS[GamePiece.CUBE.valueOf()] = 30000;
 
-        WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 59710;
-        WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 59710;
+        WRIST_HIGH_POS[GamePiece.CONE.valueOf()] = 46200;
+        WRIST_HIGH_POS[GamePiece.CUBE.valueOf()] = 46200;
 
         WRIST_STATION_POS[GamePiece.CONE.valueOf()] = 59700;
         WRIST_STATION_POS[GamePiece.CUBE.valueOf()] = 58000;
         
-        WRIST_MID_POS[GamePiece.CONE.valueOf()] = 53440;
-        WRIST_MID_POS[GamePiece.CUBE.valueOf()] = 53440;
+        WRIST_MID_POS[GamePiece.CONE.valueOf()] = 38500;
+        WRIST_MID_POS[GamePiece.CUBE.valueOf()] = 38500;
 
         WRIST_LOW_POS[GamePiece.CONE.valueOf()] = 39112;
         WRIST_LOW_POS[GamePiece.CUBE.valueOf()] = 39112;
@@ -123,8 +123,11 @@ public class Constants {
 
     public static final int PH_CAN_ID = 18;
 
-    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 0 : 0;
+    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 0.5 : 0;
     public static final double PP_PID_I = CURRENT_MODE == Mode.REAL ? 0 : 0;
-    public static final double PP_PID_D = CURRENT_MODE == Mode.REAL ? 0 : 0;
+    public static final double PP_PID_D = CURRENT_MODE == Mode.REAL ? 0.2 : 0;
+
+    public static final int ULTRASONIC_SENSOR_ID = 2;
+    public static final double CLOSEST_DISTANCE = 0.0;
 
 }

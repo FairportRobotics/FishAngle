@@ -11,6 +11,7 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -86,6 +87,8 @@ public class Robot extends LoggedRobot {
 
         Robot.MAIN_TAB.add(autoChooser);
 
+        CameraServer.startAutomaticCapture();
+
     }
 
     @Override
@@ -98,6 +101,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledInit() {
         RobotContainer.lightingSubsystem.rainbow();
+        RobotContainer.lightingSubsystem.shiftWrap();
         //RobotContainer.lightingSubsystem.getLightingController().flash("255000000");
     }
 

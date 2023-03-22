@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
@@ -71,6 +73,13 @@ public class SwerveDrivePathCommand extends PPSwerveControllerCommand {
         super.initialize();
         if(isFirstPath)
             RobotContainer.swerveDriveSubsystem.resetOdometry(traj.getInitialHolonomicPose());
+    }
+
+    @Override
+    public void execute() {
+        // TODO Auto-generated method stub
+        super.execute();
+        Logger.getInstance().recordOutput("Autonomus Path", traj);
     }
 
 }
