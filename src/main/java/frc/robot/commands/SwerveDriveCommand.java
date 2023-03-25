@@ -2,6 +2,9 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.RobotContainer;
@@ -12,10 +15,14 @@ public class SwerveDriveCommand extends CommandBase {
     CommandXboxController driverController;
     SwerveDriveSubsystem driveSubsystem;
 
+    TrapezoidProfile forwardProfile;
+
     public SwerveDriveCommand() {
         this.driverController = RobotContainer.driverController;
         this.driveSubsystem = RobotContainer.swerveDriveSubsystem;
         addRequirements(driveSubsystem);
+
+        forwardProfile = new TrapezoidProfile(new Constraints(2.5, 1.0), new State());
     }
 
     @Override

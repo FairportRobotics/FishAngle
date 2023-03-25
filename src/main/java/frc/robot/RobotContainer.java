@@ -13,11 +13,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.ArmMoveToPositionCommand;
 import frc.robot.commands.GripperCommand;
 import frc.robot.commands.SwerveDriveCommand;
-import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
 import frc.robot.commands.GripperCommand.GripperAction;
 import frc.robot.subsystem.ArmSubsystem;
 import frc.robot.subsystem.GripperSubsystem;
 import frc.robot.subsystem.LightingSubsystem;
+import frc.robot.subsystem.ArmSubsystem.ArmPosition;
 import frc.robot.subsystem.swerve.SwerveDriveSubsystem;
 
 public class RobotContainer {

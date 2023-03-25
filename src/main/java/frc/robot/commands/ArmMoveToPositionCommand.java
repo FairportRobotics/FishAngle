@@ -5,6 +5,7 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.RobotContainer.GamePiece;
 import frc.robot.subsystem.ArmSubsystem;
+import frc.robot.subsystem.ArmSubsystem.ArmPosition;
 
 public class ArmMoveToPositionCommand extends CommandBase {
 
@@ -60,15 +61,6 @@ public class ArmMoveToPositionCommand extends CommandBase {
     @Override
     public boolean isFinished() {
         return armSubsystem.isAtRequestedPosition();
-    }
-
-    public enum ArmPosition {
-        kFolded,
-        kHome,
-        kLow,
-        kMid,
-        kStation,
-        kHigh
     }
 
 }

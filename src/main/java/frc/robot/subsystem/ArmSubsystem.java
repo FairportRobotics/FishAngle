@@ -10,8 +10,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -43,6 +41,8 @@ public class ArmSubsystem extends SubsystemBase {
 
     PneumaticHub pneumaticHub;
     Solenoid brakeSolenoid;
+
+    ArmPosition currentPosition = ArmPosition.kFolded;
 
     public ArmSubsystem(CommandXboxController operatorController) {
         this.operatorController = operatorController;
@@ -167,6 +167,19 @@ public class ArmSubsystem extends SubsystemBase {
 
     public boolean isAtRequestedPosition() {
         return isArmAtSetpoint() && isWristAtSetpoint();
+    }
+
+    public ArmPosition getArmPosition(){
+        return currentPosition;
+    }
+
+    public enum ArmPosition {
+        kFolded,
+        kHome,
+        kLow,
+        kMid,
+        kStation,
+        kHigh
     }
 
 }

@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer.GamePiece;
 import frc.robot.commands.ArmMoveToPositionCommand;
-import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
 import frc.robot.commands.autonomus.LeaveZoneAndChargeAutoCommand;
 import frc.robot.commands.autonomus.LeaveZoneAutoCommand;
 import frc.robot.commands.autonomus.OneConeAutoCommand;
@@ -29,6 +28,7 @@ import frc.robot.commands.autonomus.OneCubeAutoAndLeaveCommand;
 import frc.robot.commands.autonomus.OneCubeAutoCommand;
 import frc.robot.commands.autonomus.TwoCubeAutoCommand;
 import frc.robot.commands.autonomus.TwoCubeChargeAutoCommand;
+import frc.robot.subsystem.ArmSubsystem.ArmPosition;
 
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
@@ -87,8 +87,6 @@ public class Robot extends LoggedRobot {
 
         Robot.MAIN_TAB.add(autoChooser);
 
-        CameraServer.startAutomaticCapture();
-
     }
 
     @Override
@@ -101,7 +99,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledInit() {
         RobotContainer.lightingSubsystem.rainbow();
-        RobotContainer.lightingSubsystem.shiftWrap();
+        //RobotContainer.lightingSubsystem.shiftWrap();
         //RobotContainer.lightingSubsystem.getLightingController().flash("255000000");
     }
 

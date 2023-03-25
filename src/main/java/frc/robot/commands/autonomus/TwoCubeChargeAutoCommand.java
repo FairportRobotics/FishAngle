@@ -1,14 +1,13 @@
 package frc.robot.commands.autonomus;
 
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.ArmMoveToPositionCommand;
 import frc.robot.commands.GripperCommand;
 import frc.robot.commands.SwerveDrivePathCommand;
-import frc.robot.commands.ArmMoveToPositionCommand.ArmPosition;
 import frc.robot.commands.GripperCommand.GripperAction;
+import frc.robot.subsystem.ArmSubsystem.ArmPosition;
 
 public class TwoCubeChargeAutoCommand extends SequentialCommandGroup {
 

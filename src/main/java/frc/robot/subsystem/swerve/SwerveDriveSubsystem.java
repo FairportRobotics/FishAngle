@@ -16,15 +16,14 @@ import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -33,8 +32,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -82,9 +82,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     private CommandXboxController controller;
 
-    private String prevColor = "";
-
     private AnalogInput ultrasonicSensor;
+
+    private AprilTagFieldLayout layout;
 
     private static final MechanicalConfiguration MK4I_L1 = new MechanicalConfiguration(
             0.10033,
@@ -97,9 +97,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         this.controller = controller;
 
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
+
         try {
-            this.fieldPositionEstimator = new RobotFieldPosition("front-facing", CAM_TO_ROBOT,
-                    AprilTagFields.k2023ChargedUp,
+            layout = AprilTagFieldLayout
+                    .loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+
+            this.fieldPositionEstimator = new RobotFieldPosition("back-cam", CAM_TO_ROBOT, layout,
                     PoseStrategy.CLOSEST_TO_LAST_POSE);
         } catch (IOException e) {
             e.printStackTrace();
@@ -151,12 +154,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, getHeading(),
                 getModulePositions(),
-                new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+                new Pose2d());
 
-        UsbCamera cam = CameraServer.startAutomaticCapture();
-        System.out.println(cam.getInfo().name);
-
-        aprilTags = new AprilTags("front-facing");
+        // aprilTags = new AprilTags("front-facing");
 
         ultrasonicSensor = new AnalogInput(Constants.ULTRASONIC_SENSOR_ID);
 
@@ -184,9 +184,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public void drive(ChassisSpeeds chassisSpeeds) {
         this.chassisSpeeds = chassisSpeeds;
 
-        // if (ultrasonicSensor.getValue() <= Constants.CLOSEST_DISTANCE && chassisSpeeds.vyMetersPerSecond >= 0) {
-        //     chassisSpeeds.vyMetersPerSecond = 0;
-        // }
+        switch (RobotContainer.armSubsystem.getArmPosition()) {
+            case kFolded:
+            case kHome:
+            case kLow:
+            case kMid:
+            case kHigh:
+                break;
+            case kStation:
+                if (ultrasonicSensor.getValue() <= Constants.SUBSTATION_DISTANCE &&
+                        chassisSpeeds.vyMetersPerSecond >= 0) {
+                    chassisSpeeds.vyMetersPerSecond = 0;
+                }
+                break;
+        }
 
         moduleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
         for (int i = 0; i < 4; i++) {
@@ -215,6 +226,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+
+        // if (DriverStation.getAlliance() == Alliance.Red) {
+        //     layout.setOrigin(OriginPosition.kRedAllianceWallRightSide); // Uncomment when
+        //     // on red alliance
+        // } else {
+        //     layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+        // }
+
         poseEstimator.update(getHeading(),
                 getModulePositions());
 
@@ -246,68 +265,71 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         }
 
         // Within distance to collect a cone or cube from substation
-        aprilTags.freeze();
-        if (aprilTags.hasTargets() && (aprilTags.getClosestTarget().getFiducialId() == 5
-                || aprilTags.getClosestTarget().getFiducialId() == 4)) {
-            Transform3d robotToCam = aprilTags.getClosestTarget().getBestCameraToTarget()
-                    .plus(CAM_TO_ROBOT.inverse());
-            if (robotToCam.getX() < 1.5 && Math.abs(robotToCam.getY()) < 1.31445) {
-                Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
-                controller.getHID().setRumble(RumbleType.kBothRumble, 1);
-                if (prevColor.equals("")) {
-                    prevColor = RobotContainer.lightingSubsystem.getColor();
-                }
-                RobotContainer.lightingSubsystem.setColor("000255000");
-            } else {
-                Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
-                controller.getHID().setRumble(RumbleType.kBothRumble, 0);
-                // if(!prevColor.equals("rainbow")) {
-                // RobotContainer.lightingSubsystem.rainbow(); }
-                // else if(!prevColor.equals("")) {
-                // RobotContainer.lightingSubsystem.setColor(prevColor); }
-            }
-        } else {
-            Pose2d aprilTagFourPos = new Pose2d(new Translation2d(16.178784, 6.749796), new Rotation2d());
-            Pose2d aprilTagFivePos = new Pose2d(new Translation2d(0.36195, 6.749796),
-                    new Rotation2d(Math.toRadians(180)));
-            Transform2d distToFour = poseEstimator.getEstimatedPosition().minus(aprilTagFourPos);
-            Transform2d distToFive = poseEstimator.getEstimatedPosition().minus(aprilTagFivePos);
+        // if (aprilTags.hasTargets() && (aprilTags.getClosestTarget().getFiducialId()
+        // == 5
+        // || aprilTags.getClosestTarget().getFiducialId() == 4)) {
+        // Transform3d robotToCam = aprilTags.getClosestTarget().getBestCameraToTarget()
+        // .plus(CAM_TO_ROBOT.inverse());
+        // if (robotToCam.getX() < 1.5 && Math.abs(robotToCam.getY()) < 1.31445) {
+        // Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
+        // controller.getHID().setRumble(RumbleType.kBothRumble, 1);
+        // if (prevColor.equals("")) {
+        // prevColor = RobotContainer.lightingSubsystem.getColor();
+        // }
+        // RobotContainer.lightingSubsystem.setColor("000255000");
+        // } else {
+        // Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
+        // controller.getHID().setRumble(RumbleType.kBothRumble, 0);
+        // // if(!prevColor.equals("rainbow")) {
+        // // RobotContainer.lightingSubsystem.rainbow(); }
+        // // else if(!prevColor.equals("")) {
+        // // RobotContainer.lightingSubsystem.setColor(prevColor); }
+        // }
+        // } else {
+        // Pose2d aprilTagFourPos = new Pose2d(new Translation2d(16.178784, 6.749796),
+        // new Rotation2d());
+        // Pose2d aprilTagFivePos = new Pose2d(new Translation2d(0.36195, 6.749796),
+        // new Rotation2d(Math.toRadians(180)));
+        // Transform2d distToFour =
+        // poseEstimator.getEstimatedPosition().minus(aprilTagFourPos);
+        // Transform2d distToFive =
+        // poseEstimator.getEstimatedPosition().minus(aprilTagFivePos);
 
-            if (Math.abs(distToFour.getX()) < 1.5 && Math.abs(distToFour.getTranslation().getY()) < 1.31445
-                    && aprilTagFourPos.getRotation()
-                            .getDegrees() > poseEstimator.getEstimatedPosition()
-                                    .getRotation().getDegrees() - 25
-                    && aprilTagFourPos.getRotation().getDegrees() < poseEstimator
-                            .getEstimatedPosition().getRotation().getDegrees() + 25) {
-                Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
-                controller.getHID().setRumble(RumbleType.kBothRumble, 1);
-                // if(prevColor.equals("")) { prevColor =
-                // RobotContainer.lightingSubsystem.getColor(); }
-                // RobotContainer.lightingSubsystem.setColor("000255000");
-            } else if (Math.abs(distToFive.getX()) < 1.5
-                    && Math.abs(distToFive.getTranslation().getY()) < 1.31445
-                    && aprilTagFivePos.getRotation()
-                            .getDegrees() > poseEstimator.getEstimatedPosition()
-                                    .getRotation().getDegrees() - 25
-                    && aprilTagFivePos.getRotation().getDegrees() < poseEstimator
-                            .getEstimatedPosition().getRotation().getDegrees() + 25) {
-                Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
-                controller.getHID().setRumble(RumbleType.kBothRumble, 1);
-                if (prevColor.equals("")) {
-                    prevColor = RobotContainer.lightingSubsystem.getColor();
-                }
-                // RobotContainer.lightingSubsystem.setColor("00025500");
-            } else {
-                Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
-                controller.getHID().setRumble(RumbleType.kBothRumble, 0);
-                // if(!prevColor.equals("rainbow")) {
-                // RobotContainer.lightingSubsystem.rainbow(); }
-                // else if(!prevColor.equals("")) {
-                // RobotContainer.lightingSubsystem.setColor(prevColor); }
-            }
+        // if (Math.abs(distToFour.getX()) < 1.5 &&
+        // Math.abs(distToFour.getTranslation().getY()) < 1.31445
+        // && aprilTagFourPos.getRotation()
+        // .getDegrees() > poseEstimator.getEstimatedPosition()
+        // .getRotation().getDegrees() - 25
+        // && aprilTagFourPos.getRotation().getDegrees() < poseEstimator
+        // .getEstimatedPosition().getRotation().getDegrees() + 25) {
+        // Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
+        // controller.getHID().setRumble(RumbleType.kBothRumble, 1);
+        // // if(prevColor.equals("")) { prevColor =
+        // // RobotContainer.lightingSubsystem.getColor(); }
+        // // RobotContainer.lightingSubsystem.setColor("000255000");
+        // } else if (Math.abs(distToFive.getX()) < 1.5
+        // && Math.abs(distToFive.getTranslation().getY()) < 1.31445
+        // && aprilTagFivePos.getRotation()
+        // .getDegrees() > poseEstimator.getEstimatedPosition()
+        // .getRotation().getDegrees() - 25
+        // && aprilTagFivePos.getRotation().getDegrees() < poseEstimator
+        // .getEstimatedPosition().getRotation().getDegrees() + 25) {
+        // Logger.getInstance().recordOutput("Robot Within Substation Dist", true);
+        // controller.getHID().setRumble(RumbleType.kBothRumble, 1);
+        // if (prevColor.equals("")) {
+        // prevColor = RobotContainer.lightingSubsystem.getColor();
+        // }
+        // // RobotContainer.lightingSubsystem.setColor("00025500");
+        // } else {
+        // Logger.getInstance().recordOutput("Robot Within Substation Dist", false);
+        // controller.getHID().setRumble(RumbleType.kBothRumble, 0);
+        // // if(!prevColor.equals("rainbow")) {
+        // // RobotContainer.lightingSubsystem.rainbow(); }
+        // // else if(!prevColor.equals("")) {
+        // // RobotContainer.lightingSubsystem.setColor(prevColor); }
+        // }
 
-        }
-        aprilTags.unFreeze();
+        // }
 
         // Figure out if we can drop a cone or cube into the grid (with diff levels)
         /*
