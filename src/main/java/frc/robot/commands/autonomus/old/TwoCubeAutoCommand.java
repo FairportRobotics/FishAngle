@@ -1,4 +1,4 @@
-package frc.robot.commands.autonomus;
+package frc.robot.commands.autonomus.old;
 
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -16,16 +16,19 @@ public class TwoCubeAutoCommand extends SequentialCommandGroup{
         addCommands(
             new ParallelDeadlineGroup(
                 new SwerveDrivePathCommand("Two_Cube_Place_1", true),
-                new ArmMoveToPositionCommand(ArmPosition.kHome),
+                new ArmMoveToPositionCommand(ArmPosition.kHigh),
                 new GripperCommand(GripperAction.kClose)
             ),
             new ArmMoveToPositionCommand(ArmPosition.kHigh),
-            new GripperCommand(GripperAction.kOpen),
             new WaitCommand(0.5),
+            new GripperCommand(GripperAction.kOpen),
             new ParallelDeadlineGroup(
                 new SwerveDrivePathCommand("Two_Cube_Place_2", false),
-                new ArmMoveToPositionCommand(ArmPosition.kHome),
-                new GripperCommand(GripperAction.kClose)
+                new SequentialCommandGroup(
+                    new WaitCommand(0.2),
+                    new ArmMoveToPositionCommand(ArmPosition.kHome),
+                    new GripperCommand(GripperAction.kClose)
+                )
             ),
             new ParallelCommandGroup(
                 new ArmMoveToPositionCommand(ArmPosition.kLow),
@@ -35,7 +38,11 @@ public class TwoCubeAutoCommand extends SequentialCommandGroup{
             new GripperCommand(GripperAction.kClose),
             new ParallelDeadlineGroup(
                 new SwerveDrivePathCommand("Two_Cube_Place_3", false),
-                new ArmMoveToPositionCommand(ArmPosition.kHome)
+                new SequentialCommandGroup(
+                new ArmMoveToPositionCommand(ArmPosition.kHome),
+                new WaitCommand(0.5),
+                new ArmMoveToPositionCommand(ArmPosition.kMid)
+                )
             ),
             new ArmMoveToPositionCommand(ArmPosition.kMid),
             new GripperCommand(GripperAction.kOpen),

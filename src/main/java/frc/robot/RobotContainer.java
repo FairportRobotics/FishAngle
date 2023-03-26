@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.ArmMoveToPositionCommand;
+import frc.robot.commands.AutoBalanceCommand;
 import frc.robot.commands.GripperCommand;
 import frc.robot.commands.SwerveDriveCommand;
 import frc.robot.commands.GripperCommand.GripperAction;
@@ -34,6 +35,7 @@ public class RobotContainer {
     public static final LightingSubsystem lightingSubsystem = new LightingSubsystem();
 
     private SwerveDriveCommand swerveDriveCommand;
+    private AutoBalanceCommand autoBalanceCommand;
 
     Trigger toggleGripperBtn;
     Trigger highPosBtn;
@@ -57,6 +59,7 @@ public class RobotContainer {
 
     private void initCommands() {
         this.swerveDriveCommand = new SwerveDriveCommand();
+        this.autoBalanceCommand = new AutoBalanceCommand();
     }
 
     private void configureBindings() {
@@ -93,10 +96,16 @@ public class RobotContainer {
                 System.out.println("WHY NO LIGHTS!");
             }
         }));
+
+        driverController.a().onTrue(this.autoBalanceCommand);
     }
 
     public Command getTeleopDriveCommand() {
         return swerveDriveCommand;
+    }
+
+    public Command getAutoBalanceCommand(){
+        return this.autoBalanceCommand;
     }
 
     public enum GamePiece {

@@ -26,7 +26,7 @@ public class SwerveDrivePathCommand extends PPSwerveControllerCommand {
      * @param pathName the name of the path
      */
     public SwerveDrivePathCommand(String pathName, boolean isFirstPath) {
-        super(PathPlanner.loadPath(pathName, new PathConstraints(1.0, 1.0)),
+        super(PathPlanner.loadPath(pathName, new PathConstraints(2.5, 1.0)),
                 RobotContainer.swerveDriveSubsystem::getPose, new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D),
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D),
                 new PIDController(Constants.PP_PID_P, Constants.PP_PID_I, Constants.PP_PID_D), RobotContainer.swerveDriveSubsystem::drive, true,

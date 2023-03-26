@@ -20,14 +20,18 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer.GamePiece;
 import frc.robot.commands.ArmMoveToPositionCommand;
-import frc.robot.commands.autonomus.LeaveZoneAndChargeAutoCommand;
-import frc.robot.commands.autonomus.LeaveZoneAutoCommand;
-import frc.robot.commands.autonomus.OneConeAutoCommand;
-import frc.robot.commands.autonomus.OneCubeAutoAndChargeCommand;
-import frc.robot.commands.autonomus.OneCubeAutoAndLeaveCommand;
-import frc.robot.commands.autonomus.OneCubeAutoCommand;
-import frc.robot.commands.autonomus.TwoCubeAutoCommand;
-import frc.robot.commands.autonomus.TwoCubeChargeAutoCommand;
+import frc.robot.commands.autonomus.OneCubeAutoAndChargeBottomCommand;
+import frc.robot.commands.autonomus.OneCubeAutoAndChargeMidCommand;
+import frc.robot.commands.autonomus.OneCubeAutoAndChargeTopCommand;
+import frc.robot.commands.autonomus.OneCubeAutoAndLeaveBottomCommand;
+import frc.robot.commands.autonomus.OneCubeAutoAndLeaveTopCommand;
+import frc.robot.commands.autonomus.OneCubeMidCommand;
+import frc.robot.commands.autonomus.old.LeaveZoneAndChargeAutoCommand;
+import frc.robot.commands.autonomus.old.LeaveZoneAutoCommand;
+import frc.robot.commands.autonomus.old.OneConeAutoCommand;
+import frc.robot.commands.autonomus.old.OneCubeAutoCommand;
+import frc.robot.commands.autonomus.old.TwoCubeAutoCommand;
+import frc.robot.commands.autonomus.old.TwoCubeChargeAutoCommand;
 import frc.robot.subsystem.ArmSubsystem.ArmPosition;
 
 public class Robot extends LoggedRobot {
@@ -76,14 +80,12 @@ public class Robot extends LoggedRobot {
         m_robotContainer = new RobotContainer();
 
         autoChooser.setDefaultOption("None", Commands.print("No auto command selected"));
-        autoChooser.addOption("Leave Zone", new LeaveZoneAutoCommand());
-        autoChooser.addOption("Leave Zone and Charge", new LeaveZoneAndChargeAutoCommand());
-        autoChooser.addOption("One Cone", new OneConeAutoCommand());
-        autoChooser.addOption("One Cube", new OneCubeAutoCommand());
-        autoChooser.addOption("One Cube And Leave", new OneCubeAutoAndLeaveCommand());
-        autoChooser.addOption("One Cube And Charge", new OneCubeAutoAndChargeCommand());
-        autoChooser.addOption("Two Cube", new TwoCubeAutoCommand());
-        autoChooser.addOption("Two Cube and Charge", new TwoCubeChargeAutoCommand());
+        autoChooser.addOption("One Cube Mid", new OneCubeMidCommand());
+        autoChooser.addOption("One Cube And Leave Bottom", new OneCubeAutoAndLeaveBottomCommand());
+        autoChooser.addOption("One Cube And Leave Top", new OneCubeAutoAndLeaveTopCommand());
+        autoChooser.addOption("One Cube And Charge Bottom", new OneCubeAutoAndChargeBottomCommand());
+        autoChooser.addOption("One Cube And Charge Mid", new OneCubeAutoAndChargeMidCommand());
+        autoChooser.addOption("One Cube And Charge Top", new OneCubeAutoAndChargeTopCommand());
 
         Robot.MAIN_TAB.add(autoChooser);
 
@@ -140,7 +142,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopPeriodic() {
-        if (!m_robotContainer.getTeleopDriveCommand().isScheduled()) {
+        if (!m_robotContainer.getTeleopDriveCommand().isScheduled() && !m_robotContainer.getAutoBalanceCommand().isScheduled()) {
             m_robotContainer.getTeleopDriveCommand().schedule();
         }
 

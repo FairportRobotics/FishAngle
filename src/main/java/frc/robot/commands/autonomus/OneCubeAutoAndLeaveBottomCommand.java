@@ -9,19 +9,21 @@ import frc.robot.commands.SwerveDrivePathCommand;
 import frc.robot.commands.GripperCommand.GripperAction;
 import frc.robot.subsystem.ArmSubsystem.ArmPosition;
 
-public class OneCubeAutoAndChargeCommand extends SequentialCommandGroup {
-    public OneCubeAutoAndChargeCommand() {
+public class OneCubeAutoAndLeaveBottomCommand extends SequentialCommandGroup {
+    public OneCubeAutoAndLeaveBottomCommand() {
         addCommands(
                 new GripperCommand(GripperAction.kClose),
                 new ArmMoveToPositionCommand(ArmPosition.kMid),
                 new ParallelDeadlineGroup(
-                        new SwerveDrivePathCommand("One_Cube_Place", true)),
+                        new SwerveDrivePathCommand("One_Cube_Place_Bottom", true)),
                 new ArmMoveToPositionCommand(ArmPosition.kMid),
                 new GripperCommand(GripperAction.kOpen),
                 new WaitCommand(0.5),
                 new ParallelDeadlineGroup(
-                        new SwerveDrivePathCommand("One_Cube_Charge", true),
-                        new ArmMoveToPositionCommand(ArmPosition.kHome)),
+                        new SwerveDrivePathCommand("One_Cube_Leave_Bottom", true),
+                        new SequentialCommandGroup(
+                                new WaitCommand(0.5),
+                                new ArmMoveToPositionCommand(ArmPosition.kHome))),
                 new GripperCommand(GripperAction.kClose));
     }
 }

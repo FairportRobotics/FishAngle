@@ -1,4 +1,4 @@
-package frc.robot.commands.autonomus;
+package frc.robot.commands.autonomus.old;
 
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
@@ -10,7 +10,7 @@ import frc.robot.commands.SwerveDrivePathCommand;
 public class LeaveZoneAndChargeAutoCommand extends SequentialCommandGroup{
     public LeaveZoneAndChargeAutoCommand(){
         addCommands(
-            new SwerveDrivePathCommand(PathPlanner.loadPath("Move_Out_Zone_Charge", new PathConstraints(1.75, 3)), true),
+            new SwerveDrivePathCommand(PathPlanner.loadPath("Move_Out_Zone_Charge", new PathConstraints(1, 1)), true),
             new AutoBalanceCommand()
         );
     }

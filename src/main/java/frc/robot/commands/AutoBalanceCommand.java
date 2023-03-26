@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -9,19 +11,20 @@ import frc.robot.subsystem.swerve.SwerveDriveSubsystem;
 
 public class AutoBalanceCommand extends CommandBase {
 
-    private static final float THRESHOLD = 5.0f; // Number in degrees
+    private static final float THRESHOLD = 6.0f; // Number in degrees
 
     SwerveDriveSubsystem swerveDriveSubsystem;
     AHRS gyro;
-    ChassisSpeeds chassisSpeeds;
 
     float lastAccelX = 0.0f;
     float lastAccelY = 0.0f;
     float lastSpeedX = 0.0f;
     float lastSpeedY = 0.0f;
 
-    float speedX = 0.1f;
-    float speedY = 0.1f;
+    float speedX = 0.45f;
+    float speedY = 0.45f;
+
+    double waitTime = 0;
 
     public AutoBalanceCommand() {
         swerveDriveSubsystem = RobotContainer.swerveDriveSubsystem;
@@ -31,26 +34,33 @@ public class AutoBalanceCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        chassisSpeeds = new ChassisSpeeds(0, 0, 0);
-        swerveDriveSubsystem.drive(chassisSpeeds);
+        swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0));
+        Logger.getInstance().recordOutput("AutoBalance", true);
     }
 
     @Override
     public void execute() {
 
-        float pitch = gyro.getPitch(); // Around the X axis aka, drive forward/back to fix
-        float roll = gyro.getRoll(); // Around the Y axis aka, drive left/right to fix
+        float pitch = gyro.getRoll(); // Around the X axis aka, drive forward/back to fix
+        float roll = gyro.getPitch(); // Around the Y axis aka, drive left/right to fix
 
-        chassisSpeeds.vyMetersPerSecond = Math.signum(pitch) * -speedY; // Get the angle direction and multiply it by
-                                                                        // how
-                                                                        // fast we want to go.
-                                                                        // "Why the negative?" you might ask. That's
-                                                                        // because
-                                                                        // if the angle is negative, we want to drive
-                                                                        // positive direction and vice versa
-        chassisSpeeds.vxMetersPerSecond = Math.signum(roll) * -speedX;
+        ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
+
+        if (Math.abs(pitch) >= THRESHOLD) {
+            chassisSpeeds.vxMetersPerSecond = Math.signum(pitch) * speedY; // Get the angle direction and multiply it
+                                                                           // by
+            // how
+            // fast we want to go.
+        }
+
+        if (Math.abs(roll) >= THRESHOLD) {
+            chassisSpeeds.vyMetersPerSecond = Math.signum(roll) * speedX;
+        }
 
         swerveDriveSubsystem.drive(chassisSpeeds);
+
+        Logger.getInstance().recordOutput("AutoBalance X", chassisSpeeds.vxMetersPerSecond);
+        Logger.getInstance().recordOutput("AutoBalance Y", chassisSpeeds.vyMetersPerSecond);
 
         // Get acceleration values after moving.
         lastAccelX = gyro.getWorldLinearAccelX();
@@ -59,14 +69,26 @@ public class AutoBalanceCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        boolean pitchGood = Math.abs(gyro.getPitch()) <= THRESHOLD;
-        boolean rollGood = Math.abs(gyro.getRoll()) <= THRESHOLD;
+        boolean pitchGood = Math.abs(gyro.getRoll()) <= THRESHOLD;
+        boolean rollGood = Math.abs(gyro.getPitch()) <= THRESHOLD;
+
+        // if(pitchGood && rollGood && waitTime == 0){
+        //     waitTime = Timer.getFPGATimestamp();
+        //     return false;
+        // } else if(pitchGood && rollGood && waitTime != 0){
+        //     return Timer.getFPGATimestamp() - waitTime >= 0.25;
+        // } else if(waitTime != 0 && (!rollGood || !pitchGood)){
+        //     waitTime = 0;
+        //     return false;
+        // }
 
         return pitchGood && rollGood;
     }
 
     @Override
     public void end(boolean interrupted) {
+
+        ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
         if (interrupted) {
             chassisSpeeds.omegaRadiansPerSecond = 0;
@@ -79,6 +101,8 @@ public class AutoBalanceCommand extends CommandBase {
         }
 
         swerveDriveSubsystem.drive(chassisSpeeds);
+        Logger.getInstance().recordOutput("AutoBalance", false);
+        RobotContainer.lightingSubsystem.shiftWrap();
     }
 
 }

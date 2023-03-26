@@ -123,9 +123,9 @@ public class Constants {
 
     public static final int PH_CAN_ID = 18;
 
-    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 0.75 : 0;
+    public static final double PP_PID_P = CURRENT_MODE == Mode.REAL ? 1 : 0;
     public static final double PP_PID_I = CURRENT_MODE == Mode.REAL ? 0 : 0;
-    public static final double PP_PID_D = CURRENT_MODE == Mode.REAL ? 0.2 : 0;
+    public static final double PP_PID_D = CURRENT_MODE == Mode.REAL ? 0.1 : 0;
 
     public static final int ULTRASONIC_SENSOR_ID = 2;
     public static final double SUBSTATION_DISTANCE = 291;
