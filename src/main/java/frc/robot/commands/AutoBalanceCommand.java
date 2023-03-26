@@ -41,14 +41,14 @@ public class AutoBalanceCommand extends CommandBase {
         float pitch = gyro.getPitch(); // Around the X axis aka, drive forward/back to fix
         float roll = gyro.getRoll(); // Around the Y axis aka, drive left/right to fix
 
-        chassisSpeeds.vyMetersPerSecond = Math.signum(pitch) * -speedX; // Get the angle direction and multiply it by
+        chassisSpeeds.vyMetersPerSecond = Math.signum(pitch) * -speedY; // Get the angle direction and multiply it by
                                                                         // how
                                                                         // fast we want to go.
                                                                         // "Why the negative?" you might ask. That's
                                                                         // because
                                                                         // if the angle is negative, we want to drive
                                                                         // positive direction and vice versa
-        chassisSpeeds.vxMetersPerSecond = Math.signum(roll) * -speedY;
+        chassisSpeeds.vxMetersPerSecond = Math.signum(roll) * -speedX;
 
         swerveDriveSubsystem.drive(chassisSpeeds);
 
