@@ -90,8 +90,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-
-
         CommandScheduler.getInstance().run();
     }
 
@@ -138,10 +136,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopPeriodic() {
-        if (!m_robotContainer.getTeleopDriveCommand().isScheduled()) {
-            m_robotContainer.getTeleopDriveCommand().schedule();
-        }
-
         Logger.getInstance().recordOutput("Requested GamePiece", RobotContainer.requestedGamePiece.toString());
     }
 

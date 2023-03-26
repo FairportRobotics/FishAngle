@@ -13,8 +13,6 @@ public class GoToPostitionCommand extends CommandBase {
     private final double maxMovementVelocity;
     private final double maxRotationVelocity;
 
-
-
     public GoToPostitionCommand(double x, double y, double yaw) {
         driveSubsystem = RobotContainer.swerveDriveSubsystem;
         targetPose = new Pose2d(x, y, new Rotation2d(yaw));
@@ -63,7 +61,7 @@ public class GoToPostitionCommand extends CommandBase {
 
             //if the x/y wouldn't finish in time, scale down the rotation
             if(rotationDist / rotationVelocity < Math.abs(xDist / xVelocity)) {
-                rotationVelocity /= xDist / Math.abs(xVelocity) / rotationDist * rotationVelocity;
+                rotationVelocity *=  (rotationDist / rotationVelocity) / Math.abs(xDist / xVelocity);
             }
 
         } else {
@@ -72,21 +70,16 @@ public class GoToPostitionCommand extends CommandBase {
 
             //if the x/y wouldn't finish in time, scale down the rotation
             if(rotationDist / rotationVelocity < Math.abs(yDist / yVelocity)) {
-                rotationVelocity /= yDist / Math.abs(yVelocity) / rotationDist * rotationVelocity;
+                rotationVelocity *=  (rotationDist / rotationVelocity) / Math.abs(yDist / yVelocity);
             }
         }
-        double angleDiff = targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians();
-        if (angleDiff < -Math.PI) {
-            angleDiff += 2 * Math.PI;
-        } else if (angleDiff > Math.PI) {
-            angleDiff -= 2 * Math.PI;
-        }
-        if (angleDiff < 0) {
+
+        if ((targetPose.getRotation().getDegrees() - driveSubsystem.getPose().getRotation().getDegrees() + 540) % 360 - 180 > 0) {
             rotationVelocity *= -1;
         }
 
 
-        driveSubsystem.drive(new ChassisSpeeds(xVelocity, yVelocity, rotationVelocity));
+        driveSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(xVelocity, yVelocity, rotationVelocity, currentPose.getRotation()));
     }
 
     private double getDistBetweenRadian(double rad1, double rad2) {
@@ -100,7 +93,7 @@ public class GoToPostitionCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return driveSubsystem.getPose().getTranslation().getDistance(targetPose.getTranslation()) < 0.1 && getDistBetweenRadian(targetPose.getRotation().getRadians(), driveSubsystem.getPose().getRotation().getRadians()) < 0.3;
+        return driveSubsystem.getPose().getTranslation().getDistance(targetPose.getTranslation()) < 0.05 && getDistBetweenRadian(targetPose.getRotation().getRadians(), driveSubsystem.getPose().getRotation().getRadians()) < 0.05;
     }
 
     @Override

@@ -33,7 +33,7 @@ public class AutoPlaceCommand extends SequentialCommandGroup {
                     xToGoTo = 14;
                     yawToGoTo = 0;
                 }
-                addCommands(new GoToPostitionCommand(xToGoTo, yToGoTo, yawToGoTo));
+                addCommands(new GoToPostitionCommand(xToGoTo, yToGoTo, yawToGoTo, 1.5, 1.5));
                 if(height == GridHeight.LOW) {
                     addCommands(
                             new ArmMoveToPositionCommand(ArmMoveToPositionCommand.ArmPosition.kLow),
@@ -41,20 +41,18 @@ public class AutoPlaceCommand extends SequentialCommandGroup {
                     );
                 } else if(height == GridHeight.MID) {
                     addCommands(
-                            new SwerveDrivePathCommand("One_Cube_Place", true),
                             new ArmMoveToPositionCommand(ArmMoveToPositionCommand.ArmPosition.kMid),
                             new GripperCommand(GripperCommand.GripperAction.kClose)
                     );
                 } else if(height == GridHeight.HIGH) {
                     addCommands(
-                            new SwerveDrivePathCommand("One_Cube_Place", true),
                             new ArmMoveToPositionCommand(ArmMoveToPositionCommand.ArmPosition.kHigh),
                             new GripperCommand(GripperCommand.GripperAction.kClose)
                     );
                 }
-                addCommands(new GoToPostitionCommand(1.92, yToGoTo, yawToGoTo),
+                addCommands(new GoToPostitionCommand(1.92, yToGoTo, yawToGoTo, 1.5, 1.5),
                             new GripperCommand(GripperCommand.GripperAction.kOpen),
-                            new GoToPostitionCommand(2.5, yToGoTo, yawToGoTo),
+                            new GoToPostitionCommand(2.5, yToGoTo, yawToGoTo, 1.5, 1.5),
                             new ArmMoveToPositionCommand(ArmMoveToPositionCommand.ArmPosition.kHome)
                                     .alongWith(new GripperCommand(GripperCommand.GripperAction.kClose)));
                 break;

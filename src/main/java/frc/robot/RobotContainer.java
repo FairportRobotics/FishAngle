@@ -61,6 +61,7 @@ public class RobotContainer {
 
     private void initCommands() {
         this.swerveDriveCommand = new SwerveDriveCommand();
+        swerveDriveSubsystem.setDefaultCommand(swerveDriveCommand);
     }
 
     private void configureBindings() {
@@ -70,17 +71,17 @@ public class RobotContainer {
         highPosBtn = operatorController.y();
         highPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kHigh));
 
-        stationPosBtn = operatorController.povLeft();
+        stationPosBtn = operatorController.povUp();
         stationPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kStation));
 
-        autoPlaceTopBtn = operatorController.povUp();
-        autoPlaceTopBtn.onTrue(new AutoPlaceCommand(AutoPlaceCommand.GridHeight.HIGH));
+        autoPlaceTopBtn = driverController.povUp();
+        autoPlaceTopBtn.onTrue(Commands.runOnce(() -> new AutoPlaceCommand(AutoPlaceCommand.GridHeight.HIGH).schedule()));
 
-        autoPlaceMidBtn = operatorController.povRight();
-        autoPlaceMidBtn.onTrue(new AutoPlaceCommand(AutoPlaceCommand.GridHeight.MID));
+        autoPlaceMidBtn = driverController.povRight();
+        autoPlaceMidBtn.onTrue(Commands.runOnce(() -> new AutoPlaceCommand(AutoPlaceCommand.GridHeight.MID).schedule()));
 
-        autoPlaceLowBtn = operatorController.povDown();
-        autoPlaceLowBtn.onTrue(new AutoPlaceCommand(AutoPlaceCommand.GridHeight.LOW));
+        autoPlaceLowBtn = driverController.povDown();
+        autoPlaceLowBtn.onTrue(Commands.runOnce(() -> new AutoPlaceCommand(AutoPlaceCommand.GridHeight.LOW).schedule()));
 
         midPosBtn = operatorController.b();
         midPosBtn.onTrue(new ArmMoveToPositionCommand(ArmPosition.kMid));
