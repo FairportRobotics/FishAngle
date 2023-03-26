@@ -13,10 +13,10 @@ public class OneConeAutoCommand extends SequentialCommandGroup {
     public OneConeAutoCommand() {
         addCommands(
                 new GripperCommand(GripperAction.kClose),
-                new ArmMoveToPositionCommand(ArmPosition.kMid),
+                new ArmMoveToPositionCommand(ArmPosition.kHigh),
                 new ParallelDeadlineGroup(
                         new SwerveDrivePathCommand("One_Cone_Place", true)),
-                new ArmMoveToPositionCommand(ArmPosition.kMid),
+                new ArmMoveToPositionCommand(ArmPosition.kHigh),
                 // new WaitCommand(1.0),
                 new GripperCommand(GripperAction.kOpen));
     }

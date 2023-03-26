@@ -54,7 +54,7 @@ public class ArmMoveToPositionCommand extends CommandBase {
                 break;
         }
 
-        armSubsystem.setArmPosition(armPos);
+        armSubsystem.setArmPosition(position, armPos);
         armSubsystem.setWristPosition(wristPos);
     }
 

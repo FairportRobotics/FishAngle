@@ -146,10 +146,11 @@ public class ArmSubsystem extends SubsystemBase {
         return Math.abs(armFalcon.getClosedLoopError(0)) <= ARM_SETPOINT_TOLERANCE;
     }
 
-    public void setArmPosition(double pos) {
+    public void setArmPosition(ArmPosition armPos, double pos) {
         pos = Math.max(Constants.ARM_MIN_ROM_VALUE, Math.min(pos, Constants.ARM_MAX_ROM_VALUE));
 
         armSetpoint = pos;
+        currentPosition = armPos;
     }
 
     public double getArmSetpoint() {

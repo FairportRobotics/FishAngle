@@ -35,6 +35,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -218,6 +219,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         return gyroscope.getRotation2d();
     }
 
+    public AHRS getGyro() {
+        return gyroscope;
+    }
+
     public SwerveModulePosition[] getModulePositions() {
         return new SwerveModulePosition[] { swerveModules[0].getPosition(),
                 swerveModules[1].getPosition(),
@@ -228,10 +233,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public void periodic() {
 
         // if (DriverStation.getAlliance() == Alliance.Red) {
-        //     layout.setOrigin(OriginPosition.kRedAllianceWallRightSide); // Uncomment when
-        //     // on red alliance
+        // layout.setOrigin(OriginPosition.kRedAllianceWallRightSide); // Uncomment when
+        // // on red alliance
         // } else {
-        //     layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+        // layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
         // }
 
         poseEstimator.update(getHeading(),
@@ -365,10 +370,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         // Logging
         Logger.getInstance().recordOutput("Pose Estimator", poseEstimator.getEstimatedPosition());
-        Logger.getInstance().recordOutput("Gyro Heading",
-                Math.toDegrees(gyroscope.getRotation2d().getRotations()));
         Logger.getInstance().recordOutput("SwerveModuleStates", moduleStates);
         Logger.getInstance().recordOutput("Ultrasonic Distance", ultrasonicSensor.getValue());
+
+        Logger.getInstance().recordOutput("Gyro Heading",
+                Math.toDegrees(gyroscope.getRotation2d().getRotations()));
+        Logger.getInstance().recordOutput("Gyro Roll", gyroscope.getRoll());
+        Logger.getInstance().recordOutput("Gyro Pitch", gyroscope.getPitch());
+        Logger.getInstance().recordOutput("AccelX", gyroscope.getWorldLinearAccelX());
+        Logger.getInstance().recordOutput("AccelY", gyroscope.getWorldLinearAccelY());
     }
 
     @Override
