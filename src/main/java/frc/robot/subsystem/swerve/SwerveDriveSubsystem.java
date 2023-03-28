@@ -259,7 +259,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             }
 
             poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
-                    Timer.getFPGATimestamp());
+                    cameraPose.get().timestampSeconds);
             Logger.getInstance().recordOutput("PhotonVision Field Position",
                     cameraPose.get().estimatedPose);
             // if (lowestAmbiguity < 0.2) {
