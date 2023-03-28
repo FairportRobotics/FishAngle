@@ -100,13 +100,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
 
         try {
-            layout = AprilTagFieldLayout
-                    .loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+            layout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
 
             layout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
 
             this.fieldPositionEstimator = new RobotFieldPosition("front-cam", CAM_TO_ROBOT, layout,
-                    PoseStrategy.CLOSEST_TO_LAST_POSE);
+                    PoseStrategy.MULTI_TAG_PNP);
+            this.fieldPositionEstimator.getPhotonPoseEstimator().setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -244,7 +244,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         poseEstimator.update(getHeading(),
                 getModulePositions());
 
-        fieldPositionEstimator.setLastPose(getPose());
+        fieldPositionEstimator.getPhotonPoseEstimator().setReferencePose(poseEstimator.getEstimatedPosition());
         Optional<EstimatedRobotPose> cameraPose = fieldPositionEstimator.getEstimatedGlobalPose();
 
         Logger.getInstance().recordOutput("PhotonVision has target", cameraPose.isPresent());
@@ -262,7 +262,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                     Timer.getFPGATimestamp());
             Logger.getInstance().recordOutput("PhotonVision Field Position",
                     cameraPose.get().estimatedPose);
-
             // if (lowestAmbiguity < 0.2) {
             // poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
             // Timer.getFPGATimestamp());
