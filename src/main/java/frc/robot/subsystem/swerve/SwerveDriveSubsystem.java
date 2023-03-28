@@ -51,7 +51,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             Math.hypot(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
                     Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
-    private final Transform3d CAM_TO_ROBOT = new Transform3d(new Translation3d(-0.2413, 0.3556, 0),
+    private final Transform3d CAM_TO_ROBOT = new Transform3d(new Translation3d(0.2413, 0.3556, 0),
             new Rotation3d(0, 0, 0));
 
     private final SwerveModule[] swerveModules = new SwerveModule[4];
@@ -103,9 +103,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             layout = AprilTagFieldLayout
                     .loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
 
-            layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+            layout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
 
-            this.fieldPositionEstimator = new RobotFieldPosition("back-cam", CAM_TO_ROBOT, layout,
+            this.fieldPositionEstimator = new RobotFieldPosition("front-cam", CAM_TO_ROBOT, layout,
                     PoseStrategy.CLOSEST_TO_LAST_POSE);
         } catch (IOException e) {
             e.printStackTrace();
