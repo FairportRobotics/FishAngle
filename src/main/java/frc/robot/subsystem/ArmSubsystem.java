@@ -169,7 +169,8 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public boolean isAtRequestedPosition() {
-        return isArmAtSetpoint() && isWristAtSetpoint();
+        return true;
+        //return isArmAtSetpoint() && isWristAtSetpoint();
     }
 
     public ArmPosition getArmPosition(){

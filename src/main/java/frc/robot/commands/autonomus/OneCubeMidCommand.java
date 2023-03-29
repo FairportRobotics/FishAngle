@@ -21,7 +21,7 @@ public class OneCubeMidCommand extends SequentialCommandGroup {
                 new GripperCommand(GripperAction.kOpen),
                 new WaitCommand(0.5),
                 new ParallelDeadlineGroup(
-                        new SwerveDrivePathCommand("One_Cube_Reset_Mid", true),
+                        new SwerveDrivePathCommand("One_Cube_Reset_Mid", false),
                         new SequentialCommandGroup(
                                 new WaitCommand(0.5),
                                 new ArmMoveToPositionCommand(ArmPosition.kHome))),

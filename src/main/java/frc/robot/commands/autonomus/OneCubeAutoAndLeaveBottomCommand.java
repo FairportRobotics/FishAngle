@@ -20,7 +20,7 @@ public class OneCubeAutoAndLeaveBottomCommand extends SequentialCommandGroup {
                 new GripperCommand(GripperAction.kOpen),
                 new WaitCommand(0.5),
                 new ParallelDeadlineGroup(
-                        new SwerveDrivePathCommand("One_Cube_Leave_Bottom", true),
+                        new SwerveDrivePathCommand("One_Cube_Leave_Bottom", false),
                         new SequentialCommandGroup(
                                 new WaitCommand(0.5),
                                 new ArmMoveToPositionCommand(ArmPosition.kHome))),

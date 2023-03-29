@@ -4,7 +4,7 @@ import frc.robot.RobotContainer.GamePiece;
 
 public class Constants {
 
-    public static final Mode CURRENT_MODE = Mode.REAL;
+    public static final Mode CURRENT_MODE = Mode.SIM;
     public static enum Mode {
       /** Running on a real robot. */
       REAL,

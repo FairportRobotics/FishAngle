@@ -11,6 +11,10 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import com.fairportrobotics.frc.poe.CameraTracking.AprilTags;
 import com.fairportrobotics.frc.poe.CameraTracking.RobotFieldPosition;
 import com.kauailabs.navx.frc.AHRS;
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.swervedrivespecialties.swervelib.MechanicalConfiguration;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
@@ -18,6 +22,10 @@ import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.MatBuilder;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,10 +38,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
@@ -249,17 +261,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         Logger.getInstance().recordOutput("PhotonVision has target", cameraPose.isPresent());
 
         if (cameraPose.isPresent()) {
-            // Only use position if lowest target ambiguity is < 0.2
-            double lowestAmbiguity = 1;
-            for (PhotonTrackedTarget target : cameraPose.get().targetsUsed) {
-                if (target.getPoseAmbiguity() < lowestAmbiguity) {
-                    lowestAmbiguity = target.getPoseAmbiguity();
-                }
-            }
-
             //if (!DriverStation.isAutonomousEnabled()) {
                 poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
                         cameraPose.get().timestampSeconds);
+                //poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose, cameraPose.get().timestampSeconds, new MatBuilder<N3, N1>(null, null));
             //}
 
             Logger.getInstance().recordOutput("PhotonVision Field Position",
@@ -402,4 +407,5 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         this.resetOdometry(new Pose2d(x, y, rotation));
     }
+
 }
