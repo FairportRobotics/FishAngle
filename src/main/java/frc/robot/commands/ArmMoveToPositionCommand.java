@@ -63,4 +63,8 @@ public class ArmMoveToPositionCommand extends CommandBase {
         return armSubsystem.isAtRequestedPosition();
     }
 
+    @Override
+    public void end(boolean interrupted) {
+    }
+
 }

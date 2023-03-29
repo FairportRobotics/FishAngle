@@ -143,7 +143,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public boolean isArmAtSetpoint(){
-        return Math.abs(armFalcon.getClosedLoopError(0)) <= ARM_SETPOINT_TOLERANCE;
+        return armFalcon.getClosedLoopTarget(0) == armSetpoint && Math.abs(armFalcon.getClosedLoopError(0)) <= ARM_SETPOINT_TOLERANCE;
     }
 
     public void setArmPosition(ArmPosition armPos, double pos) {
@@ -151,6 +151,7 @@ public class ArmSubsystem extends SubsystemBase {
 
         armSetpoint = pos;
         currentPosition = armPos;
+        armFalcon.set(ControlMode.Position, armSetpoint);
     }
 
     public double getArmSetpoint() {
@@ -158,12 +159,13 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public boolean isWristAtSetpoint(){
-        return Math.abs(wristFalcon.getClosedLoopError(0)) <= WRIST_SETPOINT_TOLERANCE;
+        return wristFalcon.getClosedLoopTarget(0) == wristSetpoint && Math.abs(wristFalcon.getClosedLoopError(0)) <= WRIST_SETPOINT_TOLERANCE;
     }
 
     public void setWristPosition(double pos) {
         pos = Math.max(Constants.WRIST_MIN_ROM_VALUE, Math.min(pos, Constants.WRIST_MAX_ROM_VALUE));
         wristSetpoint = pos;
+        wristFalcon.set(ControlMode.Position, wristSetpoint);
     }
 
     public boolean isAtRequestedPosition() {

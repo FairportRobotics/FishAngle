@@ -18,7 +18,6 @@ import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,10 +31,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -51,7 +46,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
             Math.hypot(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
                     Constants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
-    private final Transform3d CAM_TO_ROBOT = new Transform3d(new Translation3d(0.2413, 0.3556, 0),
+    // X: 0.2413
+    // Y: 0.3556
+
+    private final Transform3d CAM_TO_ROBOT = new Transform3d(new Translation3d(0.3556, -0.2413, 0),
             new Rotation3d(0, 0, 0));
 
     private final SwerveModule[] swerveModules = new SwerveModule[4];
@@ -102,11 +100,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         try {
             layout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
 
-            layout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
+            // layout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
 
             this.fieldPositionEstimator = new RobotFieldPosition("front-cam", CAM_TO_ROBOT, layout,
                     PoseStrategy.MULTI_TAG_PNP);
-            this.fieldPositionEstimator.getPhotonPoseEstimator().setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+            this.fieldPositionEstimator.getPhotonPoseEstimator()
+                    .setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -258,8 +257,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 }
             }
 
-            poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
-                    cameraPose.get().timestampSeconds);
+            //if (!DriverStation.isAutonomousEnabled()) {
+                poseEstimator.addVisionMeasurement(cameraPose.get().estimatedPose.toPose2d(),
+                        cameraPose.get().timestampSeconds);
+            //}
+
             Logger.getInstance().recordOutput("PhotonVision Field Position",
                     cameraPose.get().estimatedPose);
             // if (lowestAmbiguity < 0.2) {

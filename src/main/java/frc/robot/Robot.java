@@ -11,14 +11,12 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.RobotContainer.GamePiece;
 import frc.robot.commands.ArmMoveToPositionCommand;
 import frc.robot.commands.autonomus.OneCubeAutoAndChargeBottomCommand;
 import frc.robot.commands.autonomus.OneCubeAutoAndChargeMidCommand;
@@ -26,12 +24,6 @@ import frc.robot.commands.autonomus.OneCubeAutoAndChargeTopCommand;
 import frc.robot.commands.autonomus.OneCubeAutoAndLeaveBottomCommand;
 import frc.robot.commands.autonomus.OneCubeAutoAndLeaveTopCommand;
 import frc.robot.commands.autonomus.OneCubeMidCommand;
-import frc.robot.commands.autonomus.old.LeaveZoneAndChargeAutoCommand;
-import frc.robot.commands.autonomus.old.LeaveZoneAutoCommand;
-import frc.robot.commands.autonomus.old.OneConeAutoCommand;
-import frc.robot.commands.autonomus.old.OneCubeAutoCommand;
-import frc.robot.commands.autonomus.old.TwoCubeAutoCommand;
-import frc.robot.commands.autonomus.old.TwoCubeChargeAutoCommand;
 import frc.robot.subsystem.ArmSubsystem.ArmPosition;
 
 public class Robot extends LoggedRobot {
