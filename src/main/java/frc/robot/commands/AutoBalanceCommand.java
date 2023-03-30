@@ -102,7 +102,7 @@ public class AutoBalanceCommand extends CommandBase {
 
         swerveDriveSubsystem.drive(chassisSpeeds);
         Logger.getInstance().recordOutput("AutoBalance", false);
-        RobotContainer.lightingSubsystem.shiftWrap();
+        RobotContainer.lightingSubsystem.executeColor(RobotContainer.lightingSubsystem.shiftRainbow);
     }
 
 }

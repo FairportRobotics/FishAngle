@@ -88,11 +88,11 @@ public class RobotContainer {
         gamePieceToggleBtn.onTrue(Commands.runOnce(() -> {
             requestedGamePiece = requestedGamePiece == GamePiece.CONE ? GamePiece.CUBE : GamePiece.CONE;
             if (requestedGamePiece == GamePiece.CONE) {
-                RobotContainer.lightingSubsystem.setConeColor();
+                RobotContainer.lightingSubsystem.executeColor(RobotContainer.lightingSubsystem.setConeColor);
             } else if (requestedGamePiece == GamePiece.CUBE) {
-                RobotContainer.lightingSubsystem.setCubeColor();
+                RobotContainer.lightingSubsystem.executeColor(RobotContainer.lightingSubsystem.setCubeColor);;
             } else {
-                RobotContainer.lightingSubsystem.off();
+                RobotContainer.lightingSubsystem.executeColor(RobotContainer.lightingSubsystem.off);
                 System.out.println("WHY NO LIGHTS!");
             }
         }));
