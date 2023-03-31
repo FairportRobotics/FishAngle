@@ -3,6 +3,8 @@ package frc.robot.subsystem;
 //import org.apache.commons.lang3.ObjectUtils.Null;
 
 import com.fairportrobotics.frc.poe.controllers.lighting.ArduinoLightingController;
+import com.fairportrobotics.frc.poe.controllers.lighting.ArduinoLightingController.LightingCommand;
+import com.fairportrobotics.frc.poe.controllers.lighting.ArduinoLightingController.LightingCommandBuilder;
 
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -11,6 +13,17 @@ public class LightingSubsystem extends SubsystemBase {
 
     ArduinoLightingController lightingController;
     String currentColor = "";
+    String[] queueCommands;
+
+
+
+    public LightingCommand setCubeColor = new LightingCommandBuilder().fillAll("155060180").build();
+    public LightingCommand setConeColor = new LightingCommandBuilder().fillAll("235185000").build();
+    public LightingCommand off = new LightingCommandBuilder().fillAll("000000000").build();
+    public LightingCommand fillRainbow = new LightingCommandBuilder().fillRainbow().build();
+    public LightingCommand waiting = new LightingCommandBuilder().setSpecificLED("255255255", "0").setSpecificLED("255255255", "1").setSpecificLED("255255255", "2").setSpecificLED("255255255", "3").setSpecificLED("255255255", "4").shiftWrap().build();
+    public LightingCommand shiftRainbow = new LightingCommandBuilder().fillRainbow().shiftWrap().build();
+
 
     public LightingSubsystem() {
         try {
@@ -31,51 +44,10 @@ public class LightingSubsystem extends SubsystemBase {
         }  
     }
     
-    //Color rgb values have to be a multiple of 5 otherwise the arduino will never get the color correct
-    public void setCubeColor() {
-        if (lightingController != null) {
-            this.lightingController.fillAll("155060180");
-            currentColor = "155060180";
+    public void executeColor(LightingCommand command){
+        if(lightingController != null){
+            lightingController.executeCommand(command);
         }
-    }
-
-    public void setConeColor() {
-        if (lightingController != null) {
-            this.lightingController.fillAll("235185000");
-            currentColor = "235185000";
-        }
-    }
-
-    public void setColor(String color) {
-        if (lightingController != null) {
-            this.lightingController.fillAll(color);
-            currentColor = color;
-        }
-    }
-
-    public void rainbow() {
-        if (lightingController != null) {
-            this.lightingController.fillRainbow();
-            currentColor = "rainbow";
-        }
-    }
-
-    public void shiftWrap() {
-        if (lightingController != null) {
-            this.lightingController.shiftWrap();
-        }
-    }
-    public String getColor() {
-        return currentColor;
-    }
-
-    public ArduinoLightingController getLightingController(){
-        return lightingController;
-    }
-
-    public void off(){
-        if (lightingController != null)
-            this.lightingController.fillAll("000000000");
     }
 
 }

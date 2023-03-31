@@ -92,9 +92,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void disabledInit() {
-        RobotContainer.lightingSubsystem.rainbow();
-        //RobotContainer.lightingSubsystem.shiftWrap();
-        //RobotContainer.lightingSubsystem.getLightingController().flash("255000000");
+        RobotContainer.lightingSubsystem.executeColor(RobotContainer.lightingSubsystem.waiting);
     }
 
     @Override
